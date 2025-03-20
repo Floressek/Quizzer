@@ -15,28 +15,33 @@
 ## Features
 
 ### 📚 Multiple Quiz Sources
+
 - **Topic-Based Quizzes:** Generate quizzes on any topic using AI
 - **PDF-Based Quizzes:** Upload PDFs to automatically create quizzes from their content
 - **Custom Quizzes:** Create your own quizzes manually
 
 ### 🧠 AI-Powered Question Generation
+
 - Automatically generates high-quality questions based on the content
 - Multiple difficulty levels: Easy, Medium, Hard
 - Question types: Multiple Choice and Open-Ended
 
 ### 📊 Advanced Statistics & Analysis
+
 - Detailed performance tracking and visual analytics
 - Historical progress monitoring
 - Identify strengths and weaknesses
 - Personalized study recommendations
 
 ### 🎓 Learning Features
+
 - Quiz explanations for each answer
 - Study mode for reviewing content
 - Timed quizzes to improve speed
 - Bookmark difficult questions
 
 ### 🌐 User Experience
+
 - Responsive design for all devices
 - Dark/Light mode
 - Intuitive interface
