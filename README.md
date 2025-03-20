@@ -1,4 +1,4 @@
-<h1 align="center" style="font-size: 32px;">Quizzium - AI-Powered Interactive Quiz Platform</h1>
+<h1 align="center" style="font-size: 32px;">Quizzer - AI-Powered Interactive Quiz Platform</h1>
 <p align="center">
   Create and take quizzes on any topic, dynamically generated from text or PDF content using AI
 </p>
@@ -71,8 +71,8 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/quizzzy-pro.git
-   cd quizzzy-pro
+   git clone https://github.com/yourusername/quizzer.git
+   cd quizzer
    ```
 
 2. Install dependencies:
@@ -166,10 +166,10 @@ You can also deploy using Docker:
 
 ```bash
 # Build the Docker image
-docker build -t quizzzy-pro .
+docker build -t quizzer .
 
 # Run the container
-docker run -p 3000:3000 -e DATABASE_URL=your-database-url quizzzy-pro
+docker run -p 3000:3000 -e DATABASE_URL=your-database-url quizzer
 ```
 
 ## Contributing
