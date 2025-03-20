@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,30 +12,104 @@
 
 # testing
 /coverage
+/cypress/videos/
+/cypress/screenshots/
+*.lcov
+.nyc_output
 
-# next.js
+# next.js specific
+next-env.d.ts
 /.next/
 /out/
+/.swc/
+.next-*.json
 
-# production
+# packege-lock.json
+package-lock.json
+
+# builds & compiled output
 /build
+/dist
+/.vercel
+.output
+*.tsbuildinfo
+**/public/workbox-*.js
+**/public/sw.js
+**/public/fallback-*.js
 
-# misc
-.DS_Store
-*.pem
+# environment variables
+.env
+.env.*
+!.env.example
+!.env.template
 
-# debug
+# IDE specific files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+!.vscode/tasks.json
+!.vscode/launch.json
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.history
+
+# logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# OS specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.directory
+Icon?
 
-# vercel
-.vercel
+# debug
+.turbo
+.unlighthouse
+.lighthouseci
+.eslintcache
+.stylelintcache
+.prettierignore
+.eslintignore
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# local server/database files
+*.sqlite
+*.sqlite3
+*.db
+/dbdata
+.temp
+
+# package managers
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
+.npm
+
+# misc
+*.pem
+storybook-static/
+.husky/_
+.serverless/
+.fusebox/
+.dynamodb/
+.webpack/
+.tern-port
+.docusaurus
+.cache
+*.bak
+*.sw?
+*~
