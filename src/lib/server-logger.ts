@@ -3,6 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import {fileURLToPath} from 'url';
 import {dirname} from 'path';
+import 'server-only'; // Add this to ensure it's only used in server components
 
 // Constants
 const DEFAULT_LOG_LEVEL = 'debug';
@@ -46,7 +47,7 @@ const getCallerInfo = (): { filePath: string, callerInfo: CallerInfo | null } =>
 
     for (const line of stackLines) {
         // Pomijamy linie związane z loggerem i wewnętrznymi modułami
-        if (!line.includes('logger.ts') &&
+        if (!line.includes('server-logger.ts') &&
             !line.includes('node:internal/') &&
             !line.includes('node_modules/') &&
             line.includes('.ts')) {
@@ -184,7 +185,7 @@ const loggerCreate = winston.createLogger({
     ]
 });
 
-interface Logger {
+interface ServerLogger {
     error: (message: unknown, ...args: unknown[]) => void;
     warn: (message: unknown, ...args: unknown[]) => void;
     info: (message: unknown, ...args: unknown[]) => void;
@@ -195,7 +196,7 @@ interface Logger {
 }
 
 
-const wrapperLogger: Logger = {} as Logger;
+const wrapperLogger: ServerLogger = {} as ServerLogger;
 
 (['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] as const).forEach(level => {
     wrapperLogger[level] = (message: unknown, ...args: unknown[]): void => {
