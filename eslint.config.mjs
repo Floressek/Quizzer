@@ -15,7 +15,12 @@ const eslintConfig = [
         rules: {
             "@typescript-eslint/no-unused-vars": [
                 "error",
-                {argsIgnorePattern: "^", varsIgnorePattern: "^"},
+                {
+                    argsIgnorePattern: "^",  // Ignore parameters
+                    varsIgnorePattern: "^",   // Ignore variables
+                    caughtErrorsIgnorePattern: "^", // Ignore caught errors
+                    destructuredArrayIgnorePattern: "^", // Ignore destructured array elements
+                },
             ],
             "@typescript-eslint/no-empty-object-type": [
                 "error",
