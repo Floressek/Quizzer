@@ -1,4 +1,4 @@
-import {DefaultSession, NextAuthOptions} from 'next-auth';
+import {DefaultSession, getServerSession, NextAuthOptions} from 'next-auth';
 import {PrismaAdapter} from '@next-auth/prisma-adapter';
 import GoogleProvider from "next-auth/providers/google";
 import {prisma} from "@/lib/db";
@@ -13,6 +13,7 @@ declare module 'next-auth' {
     }
 }
 
+// Override the default NextAuth user type
 declare module "next-auth/jwt" {
     interface JWT {
         id: string;
@@ -46,7 +47,7 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET, // used to encrypt the JWT token
     adapter: PrismaAdapter(prisma),
     providers: [
         GoogleProvider({
@@ -54,4 +55,8 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || '' as string, // created in google cloud console
         }),
     ]
+}
+
+export const getAuthSession = () => {
+    return getServerSession(authOptions);
 }
