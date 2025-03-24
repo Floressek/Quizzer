@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import {getAuthSession} from "@/lib/nextAuth";
+import SignInButton from "@/components/SignInButton";
 
 
 type Props = {};
@@ -22,7 +23,7 @@ const Navbar = async (props: Props) => {
                     </p>
                 </Link>
                 <div className={"flex items-center gap-2"}>
-
+                    <SignInButton text={"Log in"}></SignInButton>
                 </div>
             </div>
         </div>
