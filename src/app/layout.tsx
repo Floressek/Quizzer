@@ -3,6 +3,8 @@ import {Inter} from "next/font/google";
 import "./globals.css";
 import {cn} from "@/lib/utils";
 import Navbar from "@/components/Navbar";
+import Providers from "@/components/Providers";
+import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
 export const metadata: Metadata = {
@@ -16,10 +18,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
         <body className={cn(inter.className, "antialiased min-h-screen pt-16")}>
-        <Navbar />
-        {children}
+        <Providers>
+            <Navbar/>
+            {children}
+        </Providers>
         </body>
         </html>
     );

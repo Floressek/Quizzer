@@ -6,7 +6,7 @@ import {logger} from "@/lib/client-logger";
 export default function Home() {
     return (
         <>
-            <Button onClick={() => logger.info("Button clicked")}>Hello World</Button>
+            {/*<Button onClick={() => logger.info("Button clicked")}>Hello World</Button>*/}
         </>
     );
 }
