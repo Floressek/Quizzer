@@ -8,11 +8,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
 import Link from "next/link";
 import {signOut} from "next-auth/react";
 import {logger} from "@/lib/client-logger";
 import {LogOut} from "lucide-react";
+import UserAvatar from "@/components/UserAvatar";
 
 type Props = {
     user: Pick<User, "name" | "image" | "email">;
@@ -21,11 +21,8 @@ type Props = {
 const UserAccountNav = ({user}: Props) => {
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger
-                className={"flex items-center gap-2 rounded-md border-2 border-black px-2 py-1 text-xl font-bold transition-all hover:-translate-y-[2px] md:block dark:border-white"}>
-                <Image src={user.image || ""} alt={user.name || ""} width={20} height={20}
-                       className={"h-8 w-8 rounded-full items-center "}/>
-                <p className={"hidden md:block"}>{user.name}</p>
+            <DropdownMenuTrigger>
+                <UserAvatar user={user}/>
             </DropdownMenuTrigger>
             {/*Email + Name -- SECTION 1*/}
             <DropdownMenuContent className={"bg-white dark:bg-gray-950"} align={"end"}>
