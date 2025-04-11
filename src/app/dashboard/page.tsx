@@ -4,6 +4,8 @@ import {getAuthSession} from "@/lib/nextAuth";
 import {prisma} from "@/lib/db";
 import QuizMeCard from "@/components/dashboard/QuizMeCard";
 import HistoryCard from "@/components/dashboard/HistoryCard";
+import HotTopics from "@/components/dashboard/HotTopics";
+import RecentActivities from "@/components/dashboard/RecentActivities";
 
 type Props = {};
 
@@ -28,7 +30,8 @@ const Dashboard = async (props: Props) => {
                 <HistoryCard />
             </div>
             <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-7">
-
+                <HotTopics/>
+                <RecentActivities/>
             </div>
         </main>
     );
