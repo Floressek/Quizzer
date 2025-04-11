@@ -9,6 +9,6 @@ export const quizCreationSchema = z.object({
         .enum(["multiple-choice", "open-ended"], {errorMap: () => ({message: "Please select a quiz type"})}),
     amount: z
         .number()
-        .min(1, {message: "Amount must be at least 1"})
-        .max(30, {message: "Amount must be at most 50"}) // FIXME: test of costs with OpenAI and change it later
+        .min(2, {message: "Amount must be at least 2"})
+        .max(30, {message: "Amount must be at most 30"}) // FIXME: test of costs with OpenAI and change it later
 })
