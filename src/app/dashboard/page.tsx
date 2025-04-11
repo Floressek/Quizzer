@@ -1,7 +1,6 @@
 import React from 'react';
 import {redirect} from "next/navigation";
 import {getAuthSession} from "@/lib/nextAuth";
-import {prisma} from "@/lib/db";
 import QuizMeCard from "@/components/dashboard/QuizMeCard";
 import HistoryCard from "@/components/dashboard/HistoryCard";
 import HotTopics from "@/components/dashboard/HotTopics";
