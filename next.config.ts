@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+import type {NextConfig} from "next";
 
+// FIXME: This is a temporary fix for the image domain issue with Google sign-in.
 const nextConfig: NextConfig = {
-  /* config options here */
+    images: {
+        domains: [
+            "lh3.googleusercontent.com"
+        ]
+    }
 };
 
 export default nextConfig;
