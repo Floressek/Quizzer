@@ -6,6 +6,11 @@ import SignInButton from "@/components/SignInButton";
 import {redirect} from "next/navigation";
 import {getAuthSession} from "@/lib/nextAuth";
 
+export const metadata = {
+    title: "AuthPage | Quizzy",
+    description: "Authentication page",
+}
+
 export default async function Home() {
     const session = await getAuthSession();
 
