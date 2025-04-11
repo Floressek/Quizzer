@@ -52,7 +52,7 @@
 - **Frontend:** React, Next.js 13
 - **UI Components:** shadcn/ui, Tailwind CSS
 - **Backend:** Next.js API Routes
-- **Database:** Prisma, MySQL (PlanetScale)
+- **Database:** Prisma, PostgreSQL
 - **Authentication:** NextAuth.js
 - **AI Integration:** OpenAI API
 - **PDF Processing:** pdf.js
@@ -64,7 +64,7 @@
 
 - Node.js 16+ installed
 - NPM or Yarn
-- MySQL database or PlanetScale account
+- PostgreSQL
 - OpenAI API key
 
 ### Installation
