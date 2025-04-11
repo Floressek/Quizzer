@@ -35,7 +35,7 @@ const fontSizeMapper = (word: { value: number }) => {
     return Math.log2(word.value) * 5 + 16;
 };
 
-const CustomWordCloud = (props: Props) => {
+const CustomWordCloud = (formattedTopics: Props) => {
     const theme = useTheme();
     const router = useRouter();
 

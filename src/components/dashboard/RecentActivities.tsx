@@ -22,5 +22,5 @@ const RecentActivities = (props: Props) => {
     )
 }
 
-export default RecentActivities
+export default RecentActivities;
 

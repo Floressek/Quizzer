@@ -26,5 +26,5 @@ const QuizMeCard = (props: Props) => {
     );
 };
 
-export default QuizMeCard
+export default QuizMeCard;
 

@@ -14,11 +14,11 @@ const HotTopics = (props: Props) => {
                 </CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
-                <CustomWordCloud/>
+                <CustomWordCloud formattedTopics={[]}/>
             </CardContent>
         </Card>
     )
 }
 
-export default HotTopics
+export default HotTopics;
 

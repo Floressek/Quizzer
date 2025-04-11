@@ -26,5 +26,5 @@ const HistoryCard = (props: Props) => {
     )
 }
 
-export default HistoryCard
+export default HistoryCard;
 
