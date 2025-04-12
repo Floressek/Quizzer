@@ -1,12 +1,13 @@
 import {NextResponse} from "next/server";
 import {quizCreationSchema} from "@/schemas/form/quiz";
 import {logger} from "@/lib/server-logger";
-import {strict_output} from "@/lib/gpt";
-// import {strict_output} from "@/lib/newGpt";
+// import {strict_output} from "@/lib/gpt";
+import {strict_output} from "@/lib/newGpt";
 
 interface MultipleChoiceQuestion {
     question: string;
     answer: string;
+    options?: string[]; // Dodajemy opcje dla pytań wielokrotnego wyboru
 }
 
 interface OpenEndedQuestion {
@@ -14,8 +15,30 @@ interface OpenEndedQuestion {
     answer: string;
 }
 
+interface OutputItem {
+    question: string;
+    answer: string;
+    options?: string[];
+}
+
 // Define the type for the question
 type Question = MultipleChoiceQuestion | OpenEndedQuestion;
+
+// Function to convert OutputItem to Question
+function convertToQuestion(item: OutputItem): Question {
+    if (item.options) {
+        return {
+            question: item.question,
+            answer: item.answer,
+            options: item.options
+        } as MultipleChoiceQuestion;
+    } else {
+        return {
+            question: item.question,
+            answer: item.answer
+        } as OpenEndedQuestion;
+    }
+}
 
 
 // Current placeholder for the API route
@@ -34,33 +57,69 @@ export const POST = async (req: Request, res: Response) => {
         const body = await req.json();
         // Deconstruct the body to get the values and validate them using zod
         const {amount, topic, type} = quizCreationSchema.parse(body);
-        let questions: Question | Question[] = [];
+        let questions: Question[] = [];
+
         if (type === "open-ended") {
-            questions = await strict_output(
+            // Generowanie pytań otwartych
+            const prompts = new Array(amount).fill(
+                `Generate a hard random open-ended question about ${topic}`
+            );
+
+            const result = await strict_output(
                 "You are a helpful AI that is able to generate a pair of questions and answers, " +
-                "the length of the answer should be around 40/50 characters, store all the pairs of answers and questions into a JSON array ",
-                new Array(amount).fill(
-                    `You are to generate a hard random open-ended question about ${topic} `
-                ),
+                "the length of the answer should be around 40/50 characters. Be sure to include the question and answer in the JSON output",
+                prompts,
                 {
-                    question: "question",
-                    answer: "answer with max length of 40/50 characters",
-                }
-            ) as unknown as MultipleChoiceQuestion[];
+                    question: "string",
+                    answer: "string with max length of 40/50 characters",
+                },
+                "",
+                false,
+                "gpt-4o-2024-08-06",
+                0.7,
+                3,
+                false,
+                true // Włączamy weryfikację treści
+            );
+
+            // Upewnij się, że result jest tablicą
+            questions = Array.isArray(result)
+                ? (result as unknown as OutputItem[]).map(item => convertToQuestion(item as OutputItem))
+                : [convertToQuestion(result as unknown as OutputItem)];
+
         } else if (type === "multiple-choice") {
-            questions = await strict_output(
-                "You are a helpful AI that is able to generate a pair of questions and answers, " +
-                "the length of the answer should be around 40/50 characters, store all the pairs of answers and questions into a JSON array ",
-                new Array(amount).fill(
-                    `You are to generate a hard random open-ended question about ${topic} `
-                ),
+            // Generowanie pytań wielokrotnego wyboru
+            const prompts = new Array(amount).fill(
+                `Generate a hard random multiple-choice question about ${topic}`
+            );
+
+            const result = await strict_output(
+                "You are a helpful AI that is able to generate multiple-choice questions. " +
+                "For each question, provide: the question text, 4 possible answer options, and the correct answer. " +
+                "Make sure the correct answer is one of the options.",
+                prompts,
                 {
-                    question: "question",
-                    answer: "answer with max length of 40/50 characters",
-                }
-            ) as unknown as MultipleChoiceQuestion[];
+                    question: "string",
+                    options: ["string", "string", "string", "string"],
+                    answer: "string with the correct answer (must be one of the options)"
+                },
+                "",
+                false,
+                "gpt-4o-2024-08-06",
+                0.7,
+                3,
+                false,
+                true // Włączamy weryfikację treści
+            );
+
+            // Upewnij się, że result jest tablicą
+            questions = Array.isArray(result)
+                ? (result as unknown as OutputItem[]).map(item => convertToQuestion(item as OutputItem))
+                : [convertToQuestion(result as unknown as OutputItem)];
         }
-        logger.info(`Questions for -  ${type} - generated successfully`);
+
+        logger.info(`Wygenerowano ${questions.length} pytań typu ${type} o temacie "${topic}"`);
+
         return NextResponse.json({
             questions,
         }, {
@@ -77,6 +136,15 @@ export const POST = async (req: Request, res: Response) => {
                     status: 400
                 });
         }
+
+        return NextResponse.json(
+            {
+                error: "Wystąpił nieznany błąd"
+            },
+            {
+                status: 500
+            }
+        );
     }
 
 }
