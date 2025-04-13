@@ -77,12 +77,12 @@ export async function strict_output(
         res = res.replace(/(\w)"(\w)/g, "$1'$2");
 
         if (verbose) {
-            logger.info(
+            logger.debug(
                 "System prompt:",
                 system_prompt + output_format_prompt + error_msg
             );
-            logger.info("\nUser prompt:", user_prompt);
-            logger.info("\nGPT response:", res);
+            logger.debug("\nUser prompt:", user_prompt);
+            logger.debug("\nGPT response:", res);
         }
 
         // try-catch block to ensure output format is adhered to
@@ -145,8 +145,8 @@ export async function strict_output(
         } catch (e) {
             const error = e as Error;
             error_msg = `\n\nResult: ${res}\n\nError message: ${error.message}`;
-            logger.info("An exception occurred:", error);
-            logger.info("Current invalid json format ", res);
+            logger.debug("An exception occurred:", error);
+            logger.debug("Current invalid json format ", res);
         }
     }
 

@@ -20,6 +20,7 @@ const eslintConfig = [
                     varsIgnorePattern: "^",   // Ignore variables
                     caughtErrorsIgnorePattern: "^", // Ignore caught errors
                     destructuredArrayIgnorePattern: "^", // Ignore destructured array elements
+                    typeParameterIgnorePattern: "^",
                 },
             ],
             "@typescript-eslint/no-empty-object-type": [
