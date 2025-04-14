@@ -2,6 +2,7 @@ import {NextResponse} from "next/server";
 import {quizCreationSchema} from "@/schemas/form/quiz";
 import {logger} from "@/lib/server-logger";
 import {strict_output} from "@/lib/newGpt";
+import {getAuthSession} from "@/lib/nextAuth";
 
 interface MultipleChoiceQuestion {
     question: string;
@@ -58,7 +59,6 @@ function convertToQuestion(item: OutputItem): Question {
 }
 
 
-
 // Current placeholder for the API route
 // GET /api/questions
 export const GET = async (req: Request, res: Response) => {
@@ -73,6 +73,17 @@ export const GET = async (req: Request, res: Response) => {
 // POST /api/questions
 export const POST = async (req: Request, res: Response) => {
     try {
+        const session = await getAuthSession();
+        if (!session?.user) {
+            // User is not logged in
+            return NextResponse.json(
+                {
+                    error: "User not authenticated"
+                },
+                {
+                    status: 401
+                });
+        }
         const body = await req.json();
         // Deconstruct the body to get the values and validate them using zod
         const {amount, topic, type} = quizCreationSchema.parse(body);
