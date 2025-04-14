@@ -61,7 +61,7 @@ function convertToQuestion(item: OutputItem): Question {
 
 // Current placeholder for the API route
 // GET /api/questions
-export const GET = async (req: Request, res: Response) => {
+export async function GET(request: Request) {
     logger.info("GET /api/questions");
     return NextResponse.json(
         {message: "Placeholder for GET request"},
@@ -69,21 +69,22 @@ export const GET = async (req: Request, res: Response) => {
     );
 }
 
+
 // Main function for handling POST requests for GPT question generation
 // POST /api/questions
-export const POST = async (req: Request, res: Response) => {
+export async function POST(req: Request) {
     try {
-        const session = await getAuthSession();
-        if (!session?.user) {
-            // User is not logged in
-            return NextResponse.json(
-                {
-                    error: "User not authenticated"
-                },
-                {
-                    status: 401
-                });
-        }
+        // const session = await getAuthSession();
+        // if (!session?.user) {
+        //     // User is not logged in
+        //     return NextResponse.json(
+        //         {
+        //             error: "User not authenticated"
+        //         },
+        //         {
+        //             status: 401
+        //         });
+        // }
         const body = await req.json();
         // Deconstruct the body to get the values and validate them using zod
         const {amount, topic, type} = quizCreationSchema.parse(body);
