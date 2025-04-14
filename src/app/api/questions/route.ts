@@ -61,13 +61,14 @@ function convertToQuestion(item: OutputItem): Question {
 
 // Current placeholder for the API route
 // GET /api/questions
-export const GET = async (req: Request, res: Response) => {
+export async function GET(request: Request) {
     logger.info("GET /api/questions");
     return NextResponse.json(
         {message: "Placeholder for GET request"},
         {status: 200}
     );
 }
+
 
 // Main function for handling POST requests for GPT question generation
 // POST /api/questions
