@@ -1,7 +1,6 @@
 import {NextResponse} from "next/server";
 import {quizCreationSchema} from "@/schemas/form/quiz";
 import {logger} from "@/lib/server-logger";
-// import {strict_output} from "@/lib/gpt";
 import {strict_output} from "@/lib/newGpt";
 
 interface MultipleChoiceQuestion {
@@ -42,6 +41,7 @@ function convertToQuestion(item: OutputItem): Question {
 
 
 // Current placeholder for the API route
+// GET /api/questions
 export const GET = async (req: Request, res: Response) => {
     logger.info("GET /api/questions");
     return NextResponse.json(
@@ -79,7 +79,7 @@ export const POST = async (req: Request, res: Response) => {
                 0.7,
                 3,
                 false,
-                true // Włączamy weryfikację treści
+                false // Wyłączamy weryfikację treści narazie dla testow
             );
 
             // Upewnij się, że result jest tablicą
@@ -136,7 +136,6 @@ export const POST = async (req: Request, res: Response) => {
                     status: 400
                 });
         }
-
         return NextResponse.json(
             {
                 error: "Wystąpił nieznany błąd"
@@ -146,5 +145,4 @@ export const POST = async (req: Request, res: Response) => {
             }
         );
     }
-
 }
