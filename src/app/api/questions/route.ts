@@ -18,7 +18,11 @@ interface OutputItem {
     question: string;
     answer: string;
     options?: string[];
+    option1?: string;
+    option2?: string;
+    option3?: string;
 }
+
 
 // Define the type for the question
 type Question = MultipleChoiceQuestion | OpenEndedQuestion;
@@ -26,10 +30,24 @@ type Question = MultipleChoiceQuestion | OpenEndedQuestion;
 // Function to convert OutputItem to Question
 function convertToQuestion(item: OutputItem): Question {
     if (item.options) {
+        // Handle case where options is already an array
         return {
             question: item.question,
             answer: item.answer,
             options: item.options
+        } as MultipleChoiceQuestion;
+    } else if (item.option1) {
+        // Combine individual options into an array
+        const options = [
+            item.option1,
+            item.option2,
+            item.option3
+        ].filter(option => option !== undefined);
+
+        return {
+            question: item.question,
+            answer: item.answer,
+            options: options
         } as MultipleChoiceQuestion;
     } else {
         return {
@@ -38,6 +56,7 @@ function convertToQuestion(item: OutputItem): Question {
         } as OpenEndedQuestion;
     }
 }
+
 
 
 // Current placeholder for the API route
@@ -71,7 +90,7 @@ export const POST = async (req: Request, res: Response) => {
                 prompts,
                 {
                     question: "string",
-                    answer: "string with max length of 40/50 characters",
+                    answer: "string with the correct answer max length of 40/50 characters",
                 },
                 "",
                 false,
@@ -100,7 +119,10 @@ export const POST = async (req: Request, res: Response) => {
                 prompts,
                 {
                     question: "string",
-                    options: ["string", "string", "string", "string"],
+                    option1: "1st option",
+                    option2: "2nd option",
+                    option3: "3rd option",
+                    // options: ["string", "string", "string", "string"],
                     answer: "string with the correct answer (must be one of the options)"
                 },
                 "",
