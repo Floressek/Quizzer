@@ -72,19 +72,19 @@ export async function GET(request: Request) {
 
 // Main function for handling POST requests for GPT question generation
 // POST /api/questions
-export const POST = async (req: Request, res: Response) => {
+export async function POST(req: Request) {
     try {
-        const session = await getAuthSession();
-        if (!session?.user) {
-            // User is not logged in
-            return NextResponse.json(
-                {
-                    error: "User not authenticated"
-                },
-                {
-                    status: 401
-                });
-        }
+        // const session = await getAuthSession();
+        // if (!session?.user) {
+        //     // User is not logged in
+        //     return NextResponse.json(
+        //         {
+        //             error: "User not authenticated"
+        //         },
+        //         {
+        //             status: 401
+        //         });
+        // }
         const body = await req.json();
         // Deconstruct the body to get the values and validate them using zod
         const {amount, topic, type} = quizCreationSchema.parse(body);

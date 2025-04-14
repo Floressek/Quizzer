@@ -214,7 +214,7 @@ export async function strict_output(
                         logger.debug(`[strict_output] Znaleziono ${output.length} elementów w tablicy bezpośredniej`);
                     }
                     // Sprawdzamy, czy to obiekt z numerycznymi kluczami
-                    else if (typeof parsedOutput === 'object' && parsedOutput !== null) {
+                    else if (typeof parsedOutput === 'object') {
                         const keys = Object.keys(parsedOutput);
                         const isNumericObject = keys.some(key => !isNaN(Number(key)));
 
@@ -467,7 +467,7 @@ export async function verifyJsonOutput(
         if (Array.isArray(jsonOutput)) {
             const verifiedArray: OutputItem[] = [];
 
-            for (let item of jsonOutput) {
+            for (const item of jsonOutput) {
                 try {
                     const verified = await verifyJsonOutput(
                         item,
