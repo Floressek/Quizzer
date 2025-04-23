@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import {logger} from "./server-logger";
 
-// Inicjalizacja klienta OpenAI
+// Inicjalizacja klienta openai
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -43,7 +43,7 @@ export async function strict_output(
     // start off with no error message
     let error_msg: string = "";
 
-    // Dla wielu promptów, używamy podejścia z grupowaniem
+    // Dla wielu promptów używamy podejścia z grupowaniem
     if (list_input && Array.isArray(user_prompt) && user_prompt.length > 1) {
         // Maksymalna liczba promptów w jednej grupie
         const BATCH_SIZE = 10;
@@ -129,8 +129,8 @@ export async function strict_output(
                 Return your answer as a JSON object with a single key "items" containing an array of ${promptCount} objects, like this:
                 {
                   "items": [
-                    ${Array(Math.min(3, promptCount)).fill(JSON.stringify(output_format)).join(",\n    ")}
-                    ${promptCount > 3 ? ",\n    ..." : ""}
+                    ${Array(Math.min(4, promptCount)).fill(JSON.stringify(output_format)).join(",\n    ")}
+                    ${promptCount > 4 ? ",\n    ..." : ""}
                   ]
                 }
                 
@@ -239,7 +239,7 @@ export async function strict_output(
                         } else {
                             logger.warn(`[strict_output] Niezgodna liczba odpowiedzi w ostatniej próbie: ${output.length}/${user_prompt.length}`);
 
-                            // W ostatniej próbie, dopasowujemy liczbę elementów
+                            // W ostatniej próbie dopasowujemy liczbę elementów
                             if (output.length < user_prompt.length) {
                                 logger.debug(`[strict_output] Dodaję ${user_prompt.length - output.length} brakujących elementów`);
                                 // Dodaj brakujące elementy

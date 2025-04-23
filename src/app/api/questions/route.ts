@@ -22,6 +22,7 @@ interface OutputItem {
     option1?: string;
     option2?: string;
     option3?: string;
+    option4?: string;
 }
 
 
@@ -42,7 +43,8 @@ function convertToQuestion(item: OutputItem): Question {
         const options = [
             item.option1,
             item.option2,
-            item.option3
+            item.option3,
+            item.option4
         ].filter(option => option !== undefined);
 
         return {
@@ -134,6 +136,7 @@ export async function POST(req: Request) {
                     option1: "1st option",
                     option2: "2nd option",
                     option3: "3rd option",
+                    option4: "4th option",
                     // options: ["string", "string", "string", "string"],
                     answer: "string with the correct answer (must be one of the options)"
                 },
