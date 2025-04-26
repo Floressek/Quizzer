@@ -22,8 +22,9 @@ const MCQ = ({game}: Props) => {
     // Selected choice state
     const [selectedChoice, setSelectedChoice] = React.useState<number>(0);
     // Answer checking states
-    const [correctAnswers, setCorrectAnswers] = React.useState(0);
-    const [wrongAnswers, setWrongAnswers] = React.useState(0);
+    const [correctAnswers, setCorrectAnswers] = React.useState<number>(0);
+    const [wrongAnswers, setWrongAnswers] = React.useState<number>(0);
+    const [hasEnded, setHasEnded] = React.useState<boolean>(false);
 
     // We are using memoization to avoid unnecessary re-renders and to optimize performance ;)
     const currentQuestion = React.useMemo(() => {
@@ -57,10 +58,15 @@ const MCQ = ({game}: Props) => {
                     toast.error("Wrong answer");
                     setWrongAnswers((prev) => prev + 1);
                 }
+                if (questionIndex === game.questions.length - 1) {
+                    setHasEnded(true);
+                    toast.info("Quiz ended");
+                    return;
+                }
                 setQuestionIndex((prev) => prev + 1);
             }
         });
-    }, [checkAnswer, isChecking]);
+    }, [checkAnswer, game.questions.length, isChecking, questionIndex]);
 
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -112,7 +118,7 @@ const MCQ = ({game}: Props) => {
                         <span>00.00</span>
                     </div>
                 </div>
-                <MCQCounter correctAnswers={3} wrongAnswers={5}/>
+                <MCQCounter correctAnswers={correctAnswers} wrongAnswers={wrongAnswers}/>
             </div>
             <Card className="w-full mt-4">
                 <CardHeader className="flex flex-row items-center">
