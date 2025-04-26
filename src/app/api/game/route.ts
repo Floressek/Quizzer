@@ -5,6 +5,7 @@ import axios from "axios";
 import {ZodError} from "zod";
 import {prisma} from "@/lib/db";
 import {GameType} from "@prisma/client";
+import {cookies} from "next/headers";
 
 export async function POST(request: Request) {
     try {
@@ -41,10 +42,20 @@ export async function POST(request: Request) {
             }
         })
 
+        // Downloading cookies from the request
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('next-auth.session-token')?.value ||
+            cookieStore.get('__Secure-next-auth.session-token')?.value;
+
+
         const {data} = await axios.post(`${process.env.API_URL}/api/questions`, {
             amount,
             topic,
             type
+        }, {
+            headers: {
+                Cookie: `next-auth.session-token=${sessionCookie || ''}`
+            }
         });
         // Different format for answer proj had answer as a standalone option we have it doubled
         if (type == 'multiple-choice') {

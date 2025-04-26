@@ -76,17 +76,17 @@ export async function GET(request: Request) {
 // POST /api/questions
 export async function POST(req: Request) {
     try {
-        // const session = await getAuthSession();
-        // if (!session?.user) {
-        //     // User is not logged in
-        //     return NextResponse.json(
-        //         {
-        //             error: "User not authenticated. You must be logged in to access this resource."
-        //         },
-        //         {
-        //             status: 401
-        //         });
-        // }
+        const session = await getAuthSession();
+        if (!session?.user) {
+            // User is not logged in
+            return NextResponse.json(
+                {
+                    error: "User not authenticated. You must be logged in to access this resource."
+                },
+                {
+                    status: 401
+                });
+        }
         const body = await req.json();
         // Deconstruct the body to get the values and validate them using zod
         const {amount, topic, type} = quizCreationSchema.parse(body);
