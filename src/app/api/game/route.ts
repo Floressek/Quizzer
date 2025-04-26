@@ -51,18 +51,17 @@ export async function POST(request: Request) {
             type mcqQuestion = {
                 question: string;
                 answer: string;
-                option1: string;
-                option2: string;
-                option3: string;
-                option4: string;
+                options: string[];
             }
             const manyData = data.questions.map((question: mcqQuestion) => {
-                let options = [question.answer, question.option1, question.option2, question.option3, question.option4]
+                let options = [...question.options]
                 options = options.sort(() => Math.random() - 0.5)
                 return {
                     question: question.question,
                     answer: question.answer,
-                    options: JSON.stringify(options),
+                    options: options,
+                    // Prisma handles JavaScript arrays to JSON,
+                    // if different db, make sure to check if it saves correctly
                     gameId: game.id,
                     questionType: GameType.mutiple_choice
                 }
