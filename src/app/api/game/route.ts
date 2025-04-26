@@ -40,7 +40,7 @@ export async function POST(request: Request) {
                 topic
             }
         })
-        // FIXME: make it into a global variable url
+
         const {data} = await axios.post(`${process.env.API_URL}/api/questions`, {
             amount,
             topic,
