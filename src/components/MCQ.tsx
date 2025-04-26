@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import {Game, Question} from "@prisma/client";
-import {ChevronRight, Timer} from "lucide-react";
+import {ChevronRight, Loader2, Timer} from "lucide-react";
 import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import MCQCounter from "@/components/MCQCounter";
@@ -43,8 +43,11 @@ const MCQ = ({game}: Props) => {
         }
     });
 
-    // Handle the answer checking -> button
+    // Handle the answer checking -> button, to disallow spamming the render include HERE
     const handleNextQuestion = React.useCallback(() => {
+        if (isChecking) {
+            return;
+        }
         checkAnswer(undefined, {
             onSuccess: ({isCorrect}) => {
                 if (isCorrect) {
@@ -57,7 +60,31 @@ const MCQ = ({game}: Props) => {
                 setQuestionIndex((prev) => prev + 1);
             }
         });
-    }, [checkAnswer]);
+    }, [checkAnswer, isChecking]);
+
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === '1') {
+                setSelectedChoice(0);
+            } else if (event.key === '2') {
+                setSelectedChoice(1);
+            } else if (event.key === '3') {
+                setSelectedChoice(2);
+            } else if (event.key === '4') {
+                setSelectedChoice(3);
+            } else if (event.key === 'Enter') {
+                handleNextQuestion();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Cleanup function to remove the event listener
+        return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        };
+    });
+
 
     const options = React.useMemo(() => {
         if (!currentQuestion) {
@@ -122,10 +149,12 @@ const MCQ = ({game}: Props) => {
                 })}
                 <Button
                     className="mt-2"
+                    disabled={isChecking}
                     onClick={() => {
                         handleNextQuestion();
                     }}
                 >
+                    {isChecking && <Loader2 className="w-4 h-4 mr-2 animate-spin"/>}
                     Next <ChevronRight className="w-4 h-5 ml-2"/>
                 </Button>
             </div>
