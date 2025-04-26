@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
 import {Game, Question} from "@prisma/client";
-import {ChevronRight, Loader2, Timer} from "lucide-react";
+import {BarChart, ChevronRight, Loader2, Timer} from "lucide-react";
 import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
+import {Button, buttonVariants} from "@/components/ui/button";
 import MCQCounter from "@/components/MCQCounter";
 import {Separator} from "@/components/ui/separator";
 import {useMutation} from "@tanstack/react-query";
@@ -11,6 +11,9 @@ import axios from "axios";
 import {z} from "zod";
 import {checkAnswerSchema} from "@/schemas/form/quiz";
 import {toast} from "@/components/ui/sonner";
+import Link from "next/link";
+import {cn, formatTimeDelta} from "@/lib/utils";
+import {differenceInSeconds} from "date-fns";
 
 type Props = {
     game: Game & { questions: Pick<Question, 'id' | 'options' | 'question' | 'answer'>[] }
@@ -25,6 +28,17 @@ const MCQ = ({game}: Props) => {
     const [correctAnswers, setCorrectAnswers] = React.useState<number>(0);
     const [wrongAnswers, setWrongAnswers] = React.useState<number>(0);
     const [hasEnded, setHasEnded] = React.useState<boolean>(false);
+    const [now, setNow] = React.useState<Date>(new Date());
+
+    // Time
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            if(!hasEnded) {
+            setNow(new Date());
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [hasEnded]);
 
     // We are using memoization to avoid unnecessary re-renders and to optimize performance ;)
     const currentQuestion = React.useMemo(() => {
@@ -87,7 +101,7 @@ const MCQ = ({game}: Props) => {
 
         // Cleanup function to remove the event listener
         return () => {
-        document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keydown', handleKeyDown);
         };
     });
 
@@ -103,6 +117,23 @@ const MCQ = ({game}: Props) => {
         return currentQuestion.options as string[];
     }, [currentQuestion]); // once we change the currentQuestion we will re-render the component
 
+    if (hasEnded) {
+        return (
+            <div className="absolute flex flex-col justify-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="px-4 mt-2 font-semibold text-white bg-green-500 rounded-md whitespace-nowrap">
+                    You completed the quiz in {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}!
+                </div>
+                <Link
+                    href={`/statistics/${game.id}`}
+                    className={cn(buttonVariants({ size: "lg" }), "mt-2")}
+                >
+                    View Statistics
+                    <BarChart className="w-4 h-4 ml-2" />
+                </Link>
+            </div>
+        )
+    }
+
     return (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-[80vw] max-w-4xl w-[90vw]">
             <div className="flex flex-row justify-between">
@@ -115,10 +146,13 @@ const MCQ = ({game}: Props) => {
                     <div className="flex self-start mt-3 text-slate-400">
                         <Timer className="mr-2"/>
                         {/*For testing purposes hardcoded to 00:00 FIXME*/}
-                        <span>00.00</span>
+                        {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
                     </div>
                 </div>
-                <MCQCounter correctAnswers={correctAnswers} wrongAnswers={wrongAnswers}/>
+                <MCQCounter
+                    correctAnswers={correctAnswers}
+                    wrongAnswers={wrongAnswers}
+                />
             </div>
             <Card className="w-full mt-4">
                 <CardHeader className="flex flex-row items-center">
