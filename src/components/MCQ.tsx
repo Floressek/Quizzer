@@ -33,8 +33,8 @@ const MCQ = ({game}: Props) => {
     // Time
     React.useEffect(() => {
         const interval = setInterval(() => {
-            if(!hasEnded) {
-            setNow(new Date());
+            if (!hasEnded) {
+                setNow(new Date());
             }
         }, 1000);
         return () => clearInterval(interval);
@@ -125,10 +125,10 @@ const MCQ = ({game}: Props) => {
                 </div>
                 <Link
                     href={`/statistics/${game.id}`}
-                    className={cn(buttonVariants({ size: "lg" }), "mt-2")}
+                    className={cn(buttonVariants({size: "lg"}), "mt-2")}
                 >
                     View Statistics
-                    <BarChart className="w-4 h-4 ml-2" />
+                    <BarChart className="w-4 h-4 ml-2"/>
                 </Link>
             </div>
         )
