@@ -5,9 +5,9 @@ import QuizCreation from "@/components/QuizCreation";
 import {prisma} from "@/lib/db";
 
 type Props = {
-    params: {
+    params: Promise <{
         gameId: string;
-    }
+    }>
 }
 
 export const metadata = {
@@ -15,7 +15,9 @@ export const metadata = {
     description: "Game Page",
 }
 
-const OpenEndedPage = async ({params: {gameId}}: Props) => {
+const OpenEndedPage = async ({params}: Props) => {
+    const {gameId} = await params;
+
     const session = await getAuthSession();
     if (!session?.user) {
         // User is not logged in
@@ -25,7 +27,13 @@ const OpenEndedPage = async ({params: {gameId}}: Props) => {
         where: {
             id: gameId
         }, include: {
-            questions: true
+            questions: {
+                select: {
+                    id: true,
+                    question: true,
+                    answer: true
+                }
+            }
         }
     });
     return (

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
             data: {
                 gameType: gameType,
                 timeStarted: new Date(),
-                timeEnded: "null", // new, not tested
+                timeEnded: new Date(), // to be updated later by the game logic
                 userId: session.user.id,
                 topic
             }
