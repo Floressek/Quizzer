@@ -28,6 +28,21 @@ export async function POST(request: Request) {
         })
         if (question.questionType === ('multiple-choice' as typeof question.questionType)) {
             const isCorrect = question.answer.toLowerCase().trim() === userAnswer.toLowerCase().trim();
+            await prisma.question.update({
+                where: {id: questionId},
+                data: {
+                    isCorrect
+                }
+            });
+            return NextResponse.json(
+                {
+                    message: "Answer checked",
+                    isCorrect
+                },
+                {
+                    status: 200
+                }
+            );
         }
     } catch (error) {
         return NextResponse.json(

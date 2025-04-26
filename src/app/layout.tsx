@@ -5,6 +5,7 @@ import {cn} from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import React from "react";
+import {Toaster} from "@/components/ui/sonner";
 
 const inter = Inter({subsets: ["latin"]});
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({
         <Providers>
             <Navbar/>
             {children}
+            <Toaster position="bottom-right" closeButton={true} richColors={true} />
         </Providers>
         </body>
         </html>
