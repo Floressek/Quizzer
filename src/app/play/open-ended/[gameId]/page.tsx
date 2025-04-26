@@ -36,6 +36,10 @@ const OpenEndedPage = async ({params}: Props) => {
             }
         }
     });
+    if (!game) {
+        // Game not found
+        redirect("/quiz?error=game_not_found");
+    }
     return (
         <pre>{JSON.stringify(game, null, 2)}</pre>
     )

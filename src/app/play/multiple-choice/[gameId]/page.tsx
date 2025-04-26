@@ -3,6 +3,7 @@ import {getAuthSession} from "@/lib/nextAuth";
 import {redirect} from "next/navigation";
 import QuizCreation from "@/components/QuizCreation";
 import {prisma} from "@/lib/db";
+import MCQ from "@/components/MCQ";
 
 type Props = {
     params: Promise<{
@@ -36,9 +37,14 @@ const MultipleChoicePage = async ({params}: Props) => {
             }
         }
     });
-    return (
-        <pre>{JSON.stringify(game, null, 2)}</pre>
-    )
+    if (!game) {
+        // Game not found
+        redirect("/quiz?error=game_not_found");
+    }
+    // return (
+    //     <pre>{JSON.stringify(game, null, 2)}</pre>
+    // )
+    return <MCQ game={game}/>
 }
 
 export default MultipleChoicePage;
