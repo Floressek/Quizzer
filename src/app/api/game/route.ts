@@ -56,7 +56,7 @@ export async function POST(request: Request) {
                 option3: string;
                 option4: string;
             }
-            const manyData = data.question.map((question: mcqQuestion) => {
+            const manyData = data.questions.map((question: mcqQuestion) => {
                 let options = [question.answer, question.option1, question.option2, question.option3, question.option4]
                 options = options.sort(() => Math.random() - 0.5)
                 return {
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
                     answer: question.answer,
                     options: JSON.stringify(options),
                     gameId: game.id,
-                    questionType: 'multiple-choice'
+                    questionType: GameType.mutiple_choice
                 }
             })
             await prisma.question.createMany({
@@ -75,12 +75,12 @@ export async function POST(request: Request) {
                 question: string;
                 answer: string;
             }
-            const manyData = data.question.map((question: openQuestion) => {
+            const manyData = data.questions.map((question: openQuestion) => {
                 return {
                     question: question.question,
                     answer: question.answer,
                     gameId: game.id,
-                    questionType: 'open-ended'
+                    questionType: GameType.open_ended
                 }
             })
             await prisma.question.createMany({
