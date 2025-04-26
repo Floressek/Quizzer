@@ -4,7 +4,7 @@ import {redirect} from "next/navigation";
 import QuizCreation from "@/components/QuizCreation";
 import {prisma} from "@/lib/db";
 import {Game, Question} from "@prisma/client";
-import {Timer} from "lucide-react";
+import {ChevronRight, Timer} from "lucide-react";
 import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 
@@ -18,8 +18,10 @@ export const metadata = {
 }
 
 const MCQ = ({game}: Props) => {
-    // We are using memoization to avoid unnecessary re-renders and to optimize performance ;)
     const [questionIndex, setQuestionIndex] = React.useState(0);
+    const [selectedChoice, setSelectedChoice] = React.useState<number>(0);
+
+    // We are using memoization to avoid unnecessary re-renders and to optimize performance ;)
     const currentQuestion = React.useMemo(() => {
         return game.questions[questionIndex]
     }, [questionIndex, game.questions]); // once we change the questionIndex we will re-render the component
@@ -66,9 +68,15 @@ const MCQ = ({game}: Props) => {
             <div className="flex flex-col items-center justify-center w-full mt-4">
                 {options.map((option, index) => {
                     return (
-                        <Button key={index}>
+                        <Button key={index}
+                                className="justify-start w-full py-8 mb-4"
+                                variant={selectedChoice === index ? "default" : "secondary"}
+                                onClick={() => {
+                                    setSelectedChoice(index);
+                                }}>
                             <div className="flex items-center justify-start">
-                                <div className="p-2 px-3 mr-5 border rounded-md">
+                                <div
+                                    className="p-2 px-3 mr-5 border rounded-md bg-gray-100 dark:text-slate-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-slate-800">
                                     {index + 1}
                                 </div>
                                 <div className="text-start">{option}</div>
@@ -76,6 +84,10 @@ const MCQ = ({game}: Props) => {
                         </Button>
                     )
                 })}
+                <Button
+                className="mt-2">
+                    Next <ChevronRight className="w-4 h-5 ml-2"/>
+                </Button>
             </div>
         </div>
     )
