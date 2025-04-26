@@ -29,9 +29,22 @@ const MCQ = ({game}: Props) => {
     const [wrongAnswers, setWrongAnswers] = React.useState<number>(0);
     const [hasEnded, setHasEnded] = React.useState<boolean>(false);
     const [now, setNow] = React.useState<Date>(new Date());
+    const [quizStartTime, setQuizStartTime] = React.useState<Date>(new Date());
 
-    // Time
+    // Time - DB BASED
+    // React.useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         if (!hasEnded) {
+    //             setNow(new Date());
+    //         }
+    //     }, 1000);
+    //     return () => clearInterval(interval);
+    // }, [hasEnded]);
+
+    // Local time - for testing purposes - something is cooked here FIXME later
     React.useEffect(() => {
+        // Set the quiz start time to the current time
+        setQuizStartTime(new Date());
         const interval = setInterval(() => {
             if (!hasEnded) {
                 setNow(new Date());
@@ -58,6 +71,19 @@ const MCQ = ({game}: Props) => {
         }
     });
 
+    // End time for our game
+    const {mutate: endGame} = useMutation({
+        mutationFn: async () => {
+            // Check if the data is valid based on the answer schema
+            const payload = {
+                gameId: game.id,
+                timeEnded: new Date()
+            };
+            const response = await axios.post('/api/endGame', payload);
+            return response.data;
+        }
+    });
+
     // Handle the answer checking -> button, to disallow spamming the render include HERE
     const handleNextQuestion = React.useCallback(() => {
         if (isChecking) {
@@ -73,6 +99,7 @@ const MCQ = ({game}: Props) => {
                     setWrongAnswers((prev) => prev + 1);
                 }
                 if (questionIndex === game.questions.length - 1) {
+                    endGame();
                     setHasEnded(true);
                     toast.info("Quiz ended");
                     return;
@@ -80,7 +107,7 @@ const MCQ = ({game}: Props) => {
                 setQuestionIndex((prev) => prev + 1);
             }
         });
-    }, [checkAnswer, game.questions.length, isChecking, questionIndex]);
+    }, [checkAnswer, game.questions.length, isChecking, questionIndex, endGame]);
 
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -117,6 +144,9 @@ const MCQ = ({game}: Props) => {
         return currentQuestion.options as string[];
     }, [currentQuestion]); // once we change the currentQuestion we will re-render the component
 
+
+
+
     if (hasEnded) {
         return (
             <div className="absolute flex flex-col justify-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -145,8 +175,8 @@ const MCQ = ({game}: Props) => {
                     </p>
                     <div className="flex self-start mt-3 text-slate-400">
                         <Timer className="mr-2"/>
-                        {/*For testing purposes hardcoded to 00:00 FIXME*/}
-                        {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+                        {/*{formatTimeDelta(differenceInSeconds(now, game.timeStarted))}*/}
+                        {formatTimeDelta(differenceInSeconds(now, quizStartTime))}
                     </div>
                 </div>
                 <MCQCounter
