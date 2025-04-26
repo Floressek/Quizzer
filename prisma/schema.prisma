@@ -51,7 +51,7 @@ model User {
 }
 
 enum GameType {
-  mutiple_choice
+  multiple_choice
   open_ended
 }
 
@@ -73,10 +73,10 @@ model Question {
   question          String
   answer            String
   gameId            String
-  options           Json? // for mutiple choice questions
+  options           Json? // for multiple choice questions
   percentageCorrect Float? // for open ended questions
   isCorrect         Boolean? // for multiple choice questions
-  questionType      GameType // for mutiple choice or open ended
+  questionType      GameType // for multiple choice or open ended
   userAnswer        String?
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)

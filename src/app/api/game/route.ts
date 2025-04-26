@@ -24,7 +24,7 @@ export async function POST(request: Request) {
         // Error with types
         let gameType: GameType;
         if (type === 'multiple-choice') {
-            gameType = GameType.mutiple_choice // Literówka w schemacie Prisma
+            gameType = GameType.multiple_choice
         } else if (type === 'open-ended') {
             gameType = GameType.open_ended
         } else {
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
                     // Prisma handles JavaScript arrays to JSON,
                     // if different db, make sure to check if it saves correctly
                     gameId: game.id,
-                    questionType: GameType.mutiple_choice
+                    questionType: GameType.multiple_choice
                 }
             })
             await prisma.question.createMany({

@@ -7,14 +7,11 @@ import {Game, Question} from "@prisma/client";
 import {ChevronRight, Timer} from "lucide-react";
 import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
+import MCQCounter from "@/components/MCQCounter";
+import {Separator} from "@/components/ui/separator";
 
 type Props = {
     game: Game & { questions: Pick<Question, 'id' | 'options' | 'question' | 'answer'>[] }
-}
-
-export const metadata = {
-    title: "Game | Quizzy",
-    description: "Game Page",
 }
 
 const MCQ = ({game}: Props) => {
@@ -40,22 +37,25 @@ const MCQ = ({game}: Props) => {
     return (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-[80vw] max-w-4xl w-[90vw]">
             <div className="flex flex-row justify-between">
-                {/*topic*/}
-                <p>
-                    <span className="mr-2 text-slate-400">Topic</span>
-                    <span className="px-2 py-1 text-white rounded-lg bg-slate-800">{game.topic}</span>
-                </p>
-                <div className="flex self-start mt-3 text-slate-400">
-                    <Timer className="mr-2"/>
-                    {/*For testing purposes hardcoded to 00:00 FIXME*/}
-                    <span>00.00</span>
+                <div className="flex flex-col">
+                    {/*topic*/}
+                    <p>
+                        <span className="mr-2 text-slate-400">Topic</span>
+                        <span className="px-2 py-1 text-white rounded-lg bg-slate-800">{game.topic}</span>
+                    </p>
+                    <div className="flex self-start mt-3 text-slate-400">
+                        <Timer className="mr-2"/>
+                        {/*For testing purposes hardcoded to 00:00 FIXME*/}
+                        <span>00.00</span>
+                    </div>
                 </div>
-                {/*<MCQCounter/> to be implemented*/}
+                <MCQCounter correctAnswers={3} wrongAnswers={5}/>
             </div>
             <Card className="w-full mt-4">
                 <CardHeader className="flex flex-row items-center">
-                    <CardTitle className="mr-5 text-center divide-y divide-zinc-600/50">
-                        <div>{questionIndex + 1}</div>
+                    <CardTitle className="mr-5 text-center divide-zinc-750/50">
+                        <div className="mb-1">{questionIndex + 1}</div>
+                        <Separator orientation="horizontal" className="bg-slate-400 dark:bg-slate-600 h-[1px] w-full"/>
                         <div className="text-base text-slate-400">
                             {game.questions.length}
                         </div>
@@ -85,7 +85,7 @@ const MCQ = ({game}: Props) => {
                     )
                 })}
                 <Button
-                className="mt-2">
+                    className="mt-2">
                     Next <ChevronRight className="w-4 h-5 ml-2"/>
                 </Button>
             </div>
