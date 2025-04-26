@@ -66,6 +66,12 @@ export async function POST(request: Request) {
             }
             const manyData = data.questions.map((question: mcqQuestion) => {
                 let options = [...question.options]
+                const answerExists = options.includes(question.answer)
+
+                // Check if the answer is already in the options - not plausible, but it's still undeterministic elements
+                if (!answerExists) {
+                    options.push(question.answer)
+                }
                 options = options.sort(() => Math.random() - 0.5)
                 return {
                     question: question.question,
