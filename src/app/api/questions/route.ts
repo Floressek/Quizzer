@@ -146,7 +146,8 @@ export async function POST(req: Request) {
                 0.7,
                 3,
                 false,
-                true // Włączamy weryfikację treści
+                // true // Włączamy weryfikację treści
+                false // Włączamy weryfikację treści
             );
 
             // Upewnij się, że result jest tablicą

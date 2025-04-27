@@ -10,5 +10,10 @@ export const quizCreationSchema = z.object({
     amount: z
         .number()
         .min(2, {message: "Amount must be at least 2"})
-        .max(30, {message: "Amount must be at most 30"}) // FIXME: test of costs with OpenAI and change it later
+        .max(30, {message: "Amount must be at most 30"}) // FIXME: endGame of costs with OpenAI and change it later
+})
+
+export const checkAnswerSchema = z.object({
+    questionId: z.string(),
+    userAnswer: z.string(),
 })

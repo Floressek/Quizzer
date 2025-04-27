@@ -5,6 +5,7 @@ import axios from "axios";
 import {ZodError} from "zod";
 import {prisma} from "@/lib/db";
 import {GameType} from "@prisma/client";
+import {cookies} from "next/headers";
 
 export async function POST(request: Request) {
     try {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
         // Error with types
         let gameType: GameType;
         if (type === 'multiple-choice') {
-            gameType = GameType.mutiple_choice // Literówka w schemacie Prisma
+            gameType = GameType.multiple_choice
         } else if (type === 'open-ended') {
             gameType = GameType.open_ended
         } else {
@@ -35,36 +36,51 @@ export async function POST(request: Request) {
             data: {
                 gameType: gameType,
                 timeStarted: new Date(),
-                timeEnded: new Date(),
+                timeEnded: new Date(), // to be updated later by the game logic
                 userId: session.user.id,
                 topic
             }
         })
-        // FIXME: make it into a global variable url
+
+        // Downloading cookies from the request
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('next-auth.session-token')?.value ||
+            cookieStore.get('__Secure-next-auth.session-token')?.value;
+
+
         const {data} = await axios.post(`${process.env.API_URL}/api/questions`, {
             amount,
             topic,
             type
+        }, {
+            headers: {
+                Cookie: `next-auth.session-token=${sessionCookie || ''}`
+            }
         });
         // Different format for answer proj had answer as a standalone option we have it doubled
         if (type == 'multiple-choice') {
             type mcqQuestion = {
                 question: string;
                 answer: string;
-                option1: string;
-                option2: string;
-                option3: string;
-                option4: string;
+                options: string[];
             }
-            const manyData = data.question.map((question: mcqQuestion) => {
-                let options = [question.answer, question.option1, question.option2, question.option3, question.option4]
+            const manyData = data.questions.map((question: mcqQuestion) => {
+                let options = [...question.options]
+                const answerExists = options.includes(question.answer)
+
+                // Check if the answer is already in the options - not plausible, but it's still undeterministic elements
+                if (!answerExists) {
+                    options.push(question.answer)
+                }
                 options = options.sort(() => Math.random() - 0.5)
                 return {
                     question: question.question,
                     answer: question.answer,
-                    options: JSON.stringify(options),
+                    options: options,
+                    // Prisma handles JavaScript arrays to JSON,
+                    // if different db, make sure to check if it saves correctly
                     gameId: game.id,
-                    questionType: 'multiple-choice'
+                    questionType: GameType.multiple_choice
                 }
             })
             await prisma.question.createMany({
@@ -75,12 +91,12 @@ export async function POST(request: Request) {
                 question: string;
                 answer: string;
             }
-            const manyData = data.question.map((question: openQuestion) => {
+            const manyData = data.questions.map((question: openQuestion) => {
                 return {
                     question: question.question,
                     answer: question.answer,
                     gameId: game.id,
-                    questionType: 'open-ended'
+                    questionType: GameType.open_ended
                 }
             })
             await prisma.question.createMany({
