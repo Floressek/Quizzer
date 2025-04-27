@@ -2,6 +2,7 @@ import {checkAnswerSchema} from "@/schemas/form/quiz";
 import {ZodError} from "zod";
 import {NextResponse} from "next/server";
 import {prisma} from "@/lib/db";
+import {compareTwoStrings} from "string-similarity";
 
 export async function POST(request: Request) {
     try {
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
                 userAnswer: userAnswer
             }
         })
+        // Case for multiple choice questions
         if (question.questionType === 'multiple_choice') {
             const isCorrect = question.answer.toLowerCase().trim() === userAnswer.toLowerCase().trim();
             await prisma.question.update({
@@ -44,19 +46,26 @@ export async function POST(request: Request) {
                 }
             );
         }
-        // Default case for open-ended questions
+        // Case for open-ended questions
         else if (question.questionType === 'open_ended') {
+            let percentageSimilar = compareTwoStrings(userAnswer.toLowerCase().trim(), question.answer.toLowerCase().trim());
+            percentageSimilar = Math.round(percentageSimilar * 100);
+            await prisma.question.update({
+                where: {id: questionId},
+                data: {
+                    percentageCorrect: percentageSimilar
+                }
+            })
             return NextResponse.json(
                 {
-                    message: "Open-ended answer recorded",
-                    isCorrect: null
+                    percentageSimilar,
                 },
                 {
                     status: 200
                 }
             );
         }
-        // DDefault case for other question types
+        // Default case for other question types
         else {
             return NextResponse.json(
                 {

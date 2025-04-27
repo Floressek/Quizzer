@@ -13,7 +13,7 @@ type Props = {
 
 export const metadata = {
     title: "Game | Quizzy",
-    description: "Game Page",
+    description: "Game Page  - multiple choice",
 }
 
 const MultipleChoicePage = async ({params}: Props) => {

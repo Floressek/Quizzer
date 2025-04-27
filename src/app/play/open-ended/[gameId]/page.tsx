@@ -3,6 +3,7 @@ import {getAuthSession} from "@/lib/nextAuth";
 import {redirect} from "next/navigation";
 import QuizCreation from "@/components/QuizCreation";
 import {prisma} from "@/lib/db";
+import OpenEnded from "@/components/OpenEnded";
 
 type Props = {
     params: Promise <{
@@ -12,7 +13,7 @@ type Props = {
 
 export const metadata = {
     title: "Game | Quizzy",
-    description: "Game Page",
+    description: "Game Page - open ended",
 }
 
 const OpenEndedPage = async ({params}: Props) => {
@@ -41,7 +42,7 @@ const OpenEndedPage = async ({params}: Props) => {
         redirect("/quiz?error=game_not_found");
     }
     return (
-        <pre>{JSON.stringify(game, null, 2)}</pre>
+        <OpenEnded game={game}></OpenEnded>
     )
 }
 

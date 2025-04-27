@@ -100,7 +100,8 @@ export async function POST(req: Request) {
 
             const result = await strict_output(
                 "You are a helpful AI that is able to generate a pair of questions and answers, " +
-                "the length of the answer should be around 40/50 characters. Be sure to include the question and answer in the JSON output",
+                "the length of the answer should be around 40/50 characters. " +
+                "Don't include the questions u cannot answer. Be sure to include the question and answer in the JSON output",
                 prompts,
                 {
                     question: "string",
@@ -112,7 +113,7 @@ export async function POST(req: Request) {
                 0.7,
                 3,
                 false,
-                false // Wyłączamy weryfikację treści narazie dla testow
+                false // Wyłączamy weryfikację treści na razie dla testow
             );
 
             // Upewnij się, że result jest tablicą
@@ -129,7 +130,7 @@ export async function POST(req: Request) {
             const result = await strict_output(
                 "You are a helpful AI that is able to generate multiple-choice questions. " +
                 "For each question, provide: the question text, 4 possible answer options, and the correct answer. " +
-                "Make sure the correct answer is one of the options.",
+                "Make sure the correct answer is one of the options. Don't include the questions u cannot answer. " ,
                 prompts,
                 {
                     question: "string",
