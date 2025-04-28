@@ -3,6 +3,7 @@ import { useTheme } from "next-themes";
 import React from "react";
 import WordCloud from "@/components/D3WordCloud";
 import {useRouter} from "next/navigation"; // Custom made component
+import { prisma } from "@/lib/db";
 
 type Props = {
     formattedTopics: { text: string; value: number }[];
