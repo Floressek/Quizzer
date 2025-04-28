@@ -58,6 +58,7 @@ export async function POST(request: Request) {
             {
                 headers: {
                     'Content-Type': 'application/json',
+                    'Cookie': `next-auth.session-token=${sessionCookie || ''}`
                 },
                 withCredentials: true,
             }
