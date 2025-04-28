@@ -3,39 +3,82 @@ import {NextResponse} from "next/server";
 import {prisma} from "@/lib/db";
 // import {compareTwoStrings} from "string-similarity";
 import OpenAI from 'openai';
+import {compareTwoStrings} from "string-similarity";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 
-async function calculateVectorSimilarity(text1: string, text2: string): Promise<number> {
-    const response1 = await openai.embeddings.create({
-        model: "text-embedding-ada-002",
-        input: text1.toLowerCase().trim(),
-    });
+async function calculateTextSimilarity(userAnswer: string, correctAnswer: string): Promise<number> {
+    // If the answer is too short or contains only a few characters, return 0
+    // if (!userAnswer || userAnswer.trim().length < 3 || /^[a-z]{1,3}$/i.test(userAnswer)) {
+    //     return 0;
+    // }
 
-    const response2 = await openai.embeddings.create({
-        model: "text-embedding-ada-002",
-        input: text2.toLowerCase().trim(),
-    });
+    try {
+        // Use string-similarity to calculate the similarity score
+        const stringSimilarity = compareTwoStrings(
+            userAnswer.toLowerCase().trim(),
+            correctAnswer.toLowerCase().trim()
+        );
 
-    const embedding1 = response1.data[0].embedding;
-    const embedding2 = response2.data[0].embedding;
+        // Calculate the similarity score based on string comparison
+        if (stringSimilarity < 0.1) {
+            return Math.round(stringSimilarity * 100);
+        }
 
-    // Cosine similarity calculation
-    let dotProduct = 0;
-    let norm1 = 0;
-    let norm2 = 0;
+        console.log("User answer: ", userAnswer);
+        console.log("Correct answer: ", correctAnswer);
 
-    for (let i = 0; i < embedding1.length; i++) {
-        dotProduct += embedding1[i] * embedding2[i];
-        norm1 += Math.pow(embedding1[i], 2);
-        norm2 += Math.pow(embedding2[i], 2);
+        // Use OpenAI to calculate the similarity score
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `Jesteś ekspertem w ocenie podobieństwa tekstu. Oceń podobieństwo semantyczne między odpowiedzią użytkownika a prawidłową odpowiedzią. 
+                    Zwróć liczbę od 0 do 100, gdzie:
+                    - 0-20: Kompletnie niepoprawna, nie ma związku z prawidłową odpowiedzią
+                    - 21-40: Minimalnie podobna, zawiera niektóre słowa kluczowe, ale w większości niepoprawna
+                    - 41-60: Częściowo poprawna, rozumie podstawową koncepcję
+                    - 61-80: Głównie poprawna, z drobnymi brakami lub nieścisłościami
+                    - 81-100: W pełni poprawna, zawiera wszystkie kluczowe informacje
+                    
+                    Oceń tylko podobieństwo TREŚCI, ignoruj formatowanie, wielkość liter i interpunkcję.
+                    Zwróć TYLKO liczbę, bez dodatkowego tekstu.`
+                },
+                {
+                    role: "user",
+                    content: `Prawidłowa odpowiedź: "${correctAnswer}"
+                    Odpowiedź użytkownika: "${userAnswer}"
+                    
+                    Ocena podobieństwa (0-100):`
+                }
+            ],
+            temperature: 0.8,
+            max_tokens: 5
+        });
+
+        const similarityScore = parseInt(response.choices[0].message.content?.trim() || "0");
+        console.log("Similarity score from OpenAI:", similarityScore);
+
+        // Check if the similarity score is a valid number
+        if (isNaN(similarityScore) || similarityScore < 0 || similarityScore > 100) {
+            return Math.round(stringSimilarity * 100);
+        }
+
+        return similarityScore;
+    } catch (error) {
+        console.error("Error calculating similarity:", error);
+        // Fallback to string-similarity if OpenAI fails
+        return Math.round(compareTwoStrings(
+            userAnswer.toLowerCase().trim(),
+            correctAnswer.toLowerCase().trim()
+        ) * 100);
     }
-
-    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
 }
+
 
 
 export async function POST(request: Request) {
@@ -100,8 +143,8 @@ export async function POST(request: Request) {
         //     );
         // }
         else if (question.questionType === 'open_ended') {
-            const similarity = await calculateVectorSimilarity(userAnswer, question.answer);
-            const percentageSimilar = Math.round(similarity * 100);
+            const percentageSimilar = await calculateTextSimilarity(userAnswer, question.answer);
+
 
             await prisma.question.update({
                 where: {id: questionId},
