@@ -42,13 +42,14 @@ export async function POST(request: Request) {
         })
 
         // Get the base URL from the current request
-        const requestUrl = new URL(request.url);
-        const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+        const apiUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL ||
+            process.env.RAILWAY_STATIC_URL || 'http://localhost:3000';
 
-        console.log(`Making request to: ${baseUrl}/api/questions`);
+        console.log(`Making request to: ${apiUrl}/api/questions`);
+
 
         // Use fetch with all cookies from the original request
-        const response = await fetch(`${baseUrl}/api/questions`, {
+        const response = await fetch(`${apiUrl}/api/questions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
