@@ -121,3 +121,18 @@
         @apply bg-background text-foreground;
     }
 }
+
+@keyframes progress {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: var(--progress, 100%);
+    }
+}
+
+/* Domyślna wartość zmiennej --progress */
+:root {
+    --progress: 0%;
+}
+

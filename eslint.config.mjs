@@ -13,19 +13,22 @@ const eslintConfig = [
     ...compat.extends("next/core-web-vitals", "next/typescript"),
     {
         rules: {
+            // Correct format for the rule
             "@typescript-eslint/no-unused-vars": [
                 "error",
                 {
-                    argsIgnorePattern: "^",  // Ignore parameters
-                    varsIgnorePattern: "^",   // Ignore variables
-                    caughtErrorsIgnorePattern: "^", // Ignore caught errors
-                    destructuredArrayIgnorePattern: "^", // Ignore destructured array elements
-                },
+                    argsIgnorePattern: "^",
+                    varsIgnorePattern: "^",
+                    caughtErrorsIgnorePattern: "^",
+                    destructuredArrayIgnorePattern: "^"
+                }
             ],
             "@typescript-eslint/no-empty-object-type": [
                 "error",
-                { allowObjectTypes: "always" }, // Allow empty object types, NOT RECOMMENDED ON PRODUCTION
+                { allowObjectTypes: "always" },
             ],
+            // Add this rule to allow 'any' type
+            "@typescript-eslint/no-explicit-any": "off",
         },
     },
 ];

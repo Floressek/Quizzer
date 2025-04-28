@@ -1,20 +1,29 @@
 "use client";
 import * as React from "react"
 import {SessionProvider} from "next-auth/react";
-import {ThemeProvider} from "next-themes"
+import {ThemeProvider as NextThemesProvider} from "next-themes"
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query"
 
+// Caching provider for a react-query
+const queryClient = new QueryClient();
 
 const Providers = ({
                        children,
                        ...props
-                   }: React.ComponentProps<typeof ThemeProvider>) => {
+                   }: React.ComponentProps<typeof NextThemesProvider>) => {
     return (
-        // If laggy transition change add disableTransitionOnChange
-        <ThemeProvider attribute={"class"} defaultTheme={"system"} enableSystem {...props}>
-            <SessionProvider>
-                {children}
-            </SessionProvider>
-        </ThemeProvider>
+        // If laggy transition, add disableTransitionOnChange
+        <QueryClientProvider client={queryClient}>
+            <NextThemesProvider
+                attribute={"class"}
+                defaultTheme={"system"}
+                enableSystem
+                {...props}>
+                <SessionProvider>
+                    {children}
+                </SessionProvider>
+            </NextThemesProvider>
+        </QueryClientProvider>
     )
 }
 
