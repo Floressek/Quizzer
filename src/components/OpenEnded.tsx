@@ -1,9 +1,5 @@
 "use client"
 import React from "react";
-import {getAuthSession} from "@/lib/nextAuth";
-import {redirect} from "next/navigation";
-import QuizCreation from "@/components/QuizCreation";
-import {prisma} from "@/lib/db";
 import {Game, Question} from "@prisma/client";
 import {BarChart, ChevronRight, Loader2, Timer} from "lucide-react";
 import {cn, formatTimeDelta} from "@/lib/utils";
@@ -26,22 +22,13 @@ type Props = {
 const OpenEnded = ({game}: Props) => {
     // Index for the current question
     const [questionIndex, setQuestionIndex] = React.useState(0);
+    const [blankAnswer, setBlankAnswer] = React.useState<string>("");
     // Answer checking states
     const [hasEnded, setHasEnded] = React.useState<boolean>(false);
     const [now, setNow] = React.useState<Date>(new Date());
     const [quizStartTime, setQuizStartTime] = React.useState<Date>(new Date());
 
-    // Time - DB BASED
-    // React.useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         if (!hasEnded) {
-    //             setNow(new Date());
-    //         }
-    //     }, 1000);
-    //     return () => clearInterval(interval);
-    // }, [hasEnded]);
-
-    // Local time - for testing purposes - something is cooked here FIXME later
+    // Time tracking
     React.useEffect(() => {
         // Set the quiz start time to the current time
         setQuizStartTime(new Date());
@@ -53,20 +40,22 @@ const OpenEnded = ({game}: Props) => {
         return () => clearInterval(interval);
     }, [hasEnded]);
 
-    // We are using memoization to avoid unnecessary re-renders and to optimize performance ;)
+    // Current question with memoization
     const currentQuestion = React.useMemo(() => {
         return game.questions[questionIndex]
-    }, [questionIndex, game.questions]); // once we change the questionIndex we will re-render the component
-
+    }, [questionIndex, game.questions]);
 
     // Checking the answer - POST request
     const {mutate: checkAnswer, isPending: isChecking} = useMutation({
         mutationFn: async () => {
+            console.log("Submitting user answer:", blankAnswer);
+
             // Check if the data is valid based on the answer schema
             const payload: z.infer<typeof checkAnswerSchema> = {
                 questionId: currentQuestion.id,
-                userAnswer: ''
+                userAnswer: blankAnswer // Use the collected blank answer
             };
+
             const response = await axios.post('/api/checkAnswer', payload);
             return response.data;
         }
@@ -75,7 +64,6 @@ const OpenEnded = ({game}: Props) => {
     // End time for our game
     const {mutate: endGame} = useMutation({
         mutationFn: async () => {
-            // Check if the data is valid based on the answer schema
             const payload = {
                 gameId: game.id,
                 timeEnded: new Date()
@@ -85,24 +73,41 @@ const OpenEnded = ({game}: Props) => {
         }
     });
 
-    // Handle the answer checking -> button, to disallow spamming the render include HERE
     const handleNextQuestion = React.useCallback(() => {
         if (isChecking) {
             return;
         }
+
+        console.log("Przesyłana odpowiedź:", blankAnswer);
+
+        // Sprawdź, czy odpowiedź nie jest pusta
+        if (!blankAnswer || blankAnswer.trim() === '') {
+            toast.warning("All inputs are blanks, are you sure?");
+            return;
+        }
+
         checkAnswer(undefined, {
             onSuccess: ({percentageSimilar}) => {
-                toast.info(`Your answer is ${percentageSimilar}% similar to the correct answer!`)
+                toast.info(`Twoja odpowiedź jest podobna do poprawnej w ${percentageSimilar}%!`);
+
+                // Wyczyść odpowiedź przed następnym pytaniem
+                setBlankAnswer("");
+
                 if (questionIndex === game.questions.length - 1) {
                     endGame();
                     setHasEnded(true);
                     return;
                 }
                 setQuestionIndex((prev) => prev + 1);
+            },
+            onError: (error) => {
+                console.error("Błąd sprawdzania odpowiedzi:", error);
+                toast.error("Nie udało się sprawdzić twojej odpowiedzi. Spróbuj ponownie.");
             }
         });
-    }, [checkAnswer, game.questions.length, isChecking, questionIndex, endGame]);
+    }, [checkAnswer, blankAnswer, game.questions.length, isChecking, questionIndex, endGame]);
 
+    // Handle keyboard events
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Enter') {
@@ -111,14 +116,12 @@ const OpenEnded = ({game}: Props) => {
         };
 
         document.addEventListener('keydown', handleKeyDown);
-
-        // Cleanup function to remove the event listener
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    });
+    }, [handleNextQuestion]);
 
-
+    // End game UI
     if (hasEnded) {
         return (
             <div className="absolute flex flex-col justify-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -136,7 +139,6 @@ const OpenEnded = ({game}: Props) => {
         )
     }
 
-
     return (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-[80vw] max-w-4xl w-[90vw]">
             <div className="flex flex-row justify-between">
@@ -148,15 +150,11 @@ const OpenEnded = ({game}: Props) => {
                     </p>
                     <div className="flex self-start mt-3 text-slate-400">
                         <Timer className="mr-2"/>
-                        {/*{formatTimeDelta(differenceInSeconds(now, game.timeStarted))}*/}
                         {formatTimeDelta(differenceInSeconds(now, quizStartTime))}
                     </div>
                 </div>
-                {/*<MCQCounter*/}
-                {/*    correctAnswers={correctAnswers}*/}
-                {/*    wrongAnswers={wrongAnswers}*/}
-                {/*/>*/}
             </div>
+
             <Card className="w-full mt-4">
                 <CardHeader className="flex flex-row items-center">
                     <CardTitle className="mr-5 text-center divide-zinc-750/50">
@@ -171,18 +169,21 @@ const OpenEnded = ({game}: Props) => {
                     </CardDescription>
                 </CardHeader>
             </Card>
+
             <div className="flex flex-col items-center justify-center w-full mt-4">
-                <BlankAnswerInput answer={currentQuestion.answer}/>
-            <Button
-                className="mt-2"
-                disabled={isChecking}
-                onClick={() => {
-                    handleNextQuestion();
-                }}
-            >
-                {isChecking && <Loader2 className="w-4 h-4 mr-2 animate-spin"/>}
-                Next <ChevronRight className="w-4 h-5 ml-2"/>
-            </Button>
+                <BlankAnswerInput
+                    answer={currentQuestion.answer}
+                    setBlankAnswer={setBlankAnswer}
+                />
+
+                <Button
+                    className="mt-4"
+                    disabled={isChecking}
+                    onClick={handleNextQuestion}
+                >
+                    {isChecking && <Loader2 className="w-4 h-4 mr-2 animate-spin"/>}
+                    Next <ChevronRight className="w-4 h-5 ml-2"/>
+                </Button>
             </div>
         </div>
     )
