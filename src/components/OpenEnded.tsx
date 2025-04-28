@@ -23,6 +23,7 @@ const OpenEnded = ({game}: Props) => {
     // Index for the current question
     const [questionIndex, setQuestionIndex] = React.useState(0);
     const [blankAnswer, setBlankAnswer] = React.useState<string>("");
+    const [fullUserAnswer, setFullUserAnswer] = React.useState<string>("");
     // Answer checking states
     const [hasEnded, setHasEnded] = React.useState<boolean>(false);
     const [now, setNow] = React.useState<Date>(new Date());
@@ -49,11 +50,14 @@ const OpenEnded = ({game}: Props) => {
     const {mutate: checkAnswer, isPending: isChecking} = useMutation({
         mutationFn: async () => {
             console.log("Submitting user answer:", blankAnswer);
+            console.log("Full user answer:", fullUserAnswer);
+
 
             // Check if the data is valid based on the answer schema
             const payload: z.infer<typeof checkAnswerSchema> = {
                 questionId: currentQuestion.id,
-                userAnswer: blankAnswer // Use the collected blank answer
+                userAnswer: blankAnswer, // Use the collected blank answer
+                fullUserAnswer: fullUserAnswer // Use the full user answer
             };
 
             const response = await axios.post('/api/checkAnswer', payload);
@@ -174,6 +178,7 @@ const OpenEnded = ({game}: Props) => {
                 <BlankAnswerInput
                     answer={currentQuestion.answer}
                     setBlankAnswer={setBlankAnswer}
+                    setFullUserAnswer={setFullUserAnswer}
                 />
 
                 <Button

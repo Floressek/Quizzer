@@ -4,12 +4,13 @@ import React, {useState, useEffect, useRef} from "react";
 type Props = {
     answer: string;
     setBlankAnswer: React.Dispatch<React.SetStateAction<string>>;
+    setFullUserAnswer?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const blank = "_____"
 const KEYWORD_MARKER = "$";
 
-const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
+const BlankAnswerInput = ({answer, setBlankAnswer, setFullUserAnswer}: Props) => {
     const [markedKeywords, setMarkedKeywords] = useState<string[]>([]);
     const [answerWithoutMarkers, setAnswerWithoutMarkers] = useState("");
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -95,6 +96,10 @@ const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
         // Zbuduj pełną odpowiedź i zaktualizuj stan
         const reconstructed = buildFullReconstructedAnswer(newInputValues);
         setFullAnswer(reconstructed);
+
+        if (setFullUserAnswer) {
+            setFullUserAnswer(reconstructed);
+        }
     };
 
     useEffect(() => {
