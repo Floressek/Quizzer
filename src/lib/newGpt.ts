@@ -165,7 +165,7 @@ export async function strict_output(
 
             logger.debug(`[strict_output] Wysyłanie zapytania do API, długość promptu: ${userContent.length} znaków`);
 
-            // Użyj OpenAI z JSON mode
+            // Użyj openai z JSON mode
             const response = await openai.chat.completions.create({
                 temperature: temperature,
                 model: model,

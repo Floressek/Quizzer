@@ -95,16 +95,31 @@ export async function POST(req: Request) {
         if (type === "open-ended") {
             // Generowanie pytań otwartych
             const prompts = new Array(amount).fill(
-                `Generate a hard random open-ended question about ${topic}`
+                `Generate a difficult, open-ended question related to ${topic}. 
+                    In the answer, mark the 3 most important terms by placing a dollar sign $ before each. Two if the answer is short.
+                    The important terms should be key dates, names, concepts, or keywords critical to the answer.
+                    
+                    Both question and answer should be lengthy min. 30 words each, especially the answer should be long enough to be informative, so when the $ marked words are removed, the answer should still be deducible from the context.
+                    
+                    Example 1:
+                    Question: What were the main terms of the Treaty of Versailles?
+                    Answer: The Treaty of Versailles was signed in $1919 by $Germany and the $Allied-Powers.
+                    
+                    Example 2:
+                    Question: Why is the sky blue?
+                    Answer: The sky appears blue due to $Rayleigh scattering of sunlight by $atmospheric particles.
+                    
+                    Ensure the question is open-ended and challenging, and that the answer highlights only the most essential terms with a $ mark.`
             );
 
             const result = await strict_output(
                 "You are a helpful AI that is able to generate a pair of questions and answers, " +
-                "the length of the answer should be around 40/50 characters. Be sure to include the question and answer in the JSON output",
+                "the length of the answer should be minimum 100/120 characters, max 180/200 " +
+                "Don't include the questions u cannot answer. Be sure to include the question and answer in the JSON output",
                 prompts,
                 {
                     question: "string",
-                    answer: "string with the correct answer max length of 40/50 characters",
+                    answer: "string with the correct answer max length of minimum 100/120 characters, max 180/200",
                 },
                 "",
                 false,
@@ -112,7 +127,7 @@ export async function POST(req: Request) {
                 0.7,
                 3,
                 false,
-                false // Wyłączamy weryfikację treści narazie dla testow
+                false // Wyłączamy weryfikację treści na razie dla testow
             );
 
             // Upewnij się, że result jest tablicą
@@ -127,9 +142,9 @@ export async function POST(req: Request) {
             );
 
             const result = await strict_output(
-                "You are a helpful AI that is able to generate multiple-choice questions. " +
+                "You are a helpful AI that generates difficult multiple-choice questions. " +
                 "For each question, provide: the question text, 4 possible answer options, and the correct answer. " +
-                "Make sure the correct answer is one of the options.",
+                "Make sure the correct answer is one of the options. Don't include the questions u cannot answer. ",
                 prompts,
                 {
                     question: "string",
@@ -147,7 +162,7 @@ export async function POST(req: Request) {
                 3,
                 false,
                 // true // Włączamy weryfikację treści
-                false // Włączamy weryfikację treści
+                false // Wyłączamy weryfikację treści
             );
 
             // Upewnij się, że result jest tablicą
