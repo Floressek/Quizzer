@@ -1,11 +1,9 @@
 import {getAuthSession} from "@/lib/nextAuth";
 import {NextResponse} from "next/server";
 import {quizCreationSchema} from "@/schemas/form/quiz";
-import axios from "axios";
 import {ZodError} from "zod";
 import {prisma} from "@/lib/db";
 import {GameType} from "@prisma/client";
-import {cookies} from "next/headers";
 
 export async function POST(request: Request) {
     try {
@@ -32,6 +30,7 @@ export async function POST(request: Request) {
                 error: "Invalid type"
             }, {status: 400})
         }
+
         const game = await prisma.game.create({
             data: {
                 gameType: gameType,
@@ -42,27 +41,36 @@ export async function POST(request: Request) {
             }
         })
 
-        // Downloading cookies from the request
-        const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('next-auth.session-token')?.value ||
-            cookieStore.get('__Secure-next-auth.session-token')?.value;
+        // Get the base URL from the current request
+        const requestUrl = new URL(request.url);
+        const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
 
+        console.log(`Making request to: ${baseUrl}/api/questions`);
 
-        const { data } = await axios.post(
-            `${process.env.API_URL}/api/questions`,
-            {
+        // Use fetch with all cookies from the original request
+        const response = await fetch(`${baseUrl}/api/questions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Forward all cookies including auth
+                'Cookie': request.headers.get('cookie') || '',
+            },
+            body: JSON.stringify({
                 amount,
                 topic,
-                type,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Cookie': `next-auth.session-token=${sessionCookie || ''}`
-                },
-                withCredentials: true,
-            }
-        );
+                type
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`API request failed with status ${response.status}: ${errorText}`);
+            throw new Error(`Failed to fetch questions: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log(`Successfully received questions: ${data.questions.length}`);
+
         // Different format for answer proj had answer as a standalone option we have it doubled
         if (type == 'multiple-choice') {
             type mcqQuestion = {
@@ -74,7 +82,7 @@ export async function POST(request: Request) {
                 let options = [...question.options]
                 const answerExists = options.includes(question.answer)
 
-                // Check if the answer is already in the options - not plausible, but it's still undeterministic elements
+                // Check if the answer is already in the options
                 if (!answerExists) {
                     options.push(question.answer)
                 }
@@ -83,12 +91,11 @@ export async function POST(request: Request) {
                     question: question.question,
                     answer: question.answer,
                     options: options,
-                    // Prisma handles JavaScript arrays to JSON,
-                    // if different db, make sure to check if it saves correctly
                     gameId: game.id,
                     questionType: GameType.multiple_choice
                 }
             })
+
             await prisma.question.createMany({
                 data: manyData
             })
@@ -105,10 +112,12 @@ export async function POST(request: Request) {
                     questionType: GameType.open_ended
                 }
             })
+
             await prisma.question.createMany({
                 data: manyData
             })
         }
+
         return NextResponse.json({
             gameId: game.id,
         }, {
@@ -121,9 +130,12 @@ export async function POST(request: Request) {
                 {status: 400}
             )
         }
+
         console.error("Error in POST /api/game", error);
+
         return NextResponse.json({
-            error: "SomethingWentWrong"
+            error: "SomethingWentWrong",
+            message: error instanceof Error ? error.message : String(error)
         }, {status: 500})
     }
 }
