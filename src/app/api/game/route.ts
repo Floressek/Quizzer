@@ -48,15 +48,20 @@ export async function POST(request: Request) {
             cookieStore.get('__Secure-next-auth.session-token')?.value;
 
 
-        const {data} = await axios.post(`${process.env.API_URL}/api/questions`, {
-            amount,
-            topic,
-            type
-        }, {
-            headers: {
-                Cookie: `next-auth.session-token=${sessionCookie || ''}`
+        const { data } = await axios.post(
+            `${process.env.API_URL}/api/questions`,
+            {
+                amount,
+                topic,
+                type,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true,
             }
-        });
+        );
         // Different format for answer proj had answer as a standalone option we have it doubled
         if (type == 'multiple-choice') {
             type mcqQuestion = {
