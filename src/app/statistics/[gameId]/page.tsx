@@ -6,20 +6,20 @@ import QuizCreation from "@/components/QuizCreation";
 type Props = {}
 
 export const metadata = {
-    title: "Quiz | Quizzy",
-    description: "Quiz Page",
+    title: "Statistics | Quizzy",
+    description: "Statistics Page",
 }
 
-const Quiz = async (props: Props) => {
-    const session = await getAuthSession();
-    if (!session?.user) {
-        // User is not logged in
-        redirect("/?error=auth_required");
-    }
+const StatisticsPage = async (props: Props) => {
+    // const session = await getAuthSession();
+    // if (!session?.user) {
+    //     // User is not logged in
+    //     redirect("/?error=auth_required");
+    // }
     return (
-        <QuizCreation/>
+        <div>Hello</div>
     )
 }
 
-export default Quiz;
+export default StatisticsPage;
 
