@@ -7,6 +7,7 @@ type Props = {
 };
 
 const blank = "_____"
+const KEYWORD_MARKER = "$";
 
 const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
     const [markedKeywords, setMarkedKeywords] = useState<string[]>([]);
@@ -44,16 +45,30 @@ const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
         return processedAnswer;
     }, [answerWithoutMarkers, markedKeywords]);
 
+    // API watermarking the answer
+    const prepareAnswerForAPI = (userInputs: string[]): string => {
+        if (userInputs.every(input => !input || input.trim() === '')) {
+            return '';
+        }
+
+        // Watermark the answer with user inputs
+        const markedUserInputs = userInputs
+            .filter(input => input && input.trim() !== '')
+            .map(input => `${KEYWORD_MARKER}${input.trim()}${KEYWORD_MARKER}`)
+
+        return markedUserInputs.join(' ');
+    }
+
     // Function to build the full reconstructed answer
     const buildFullReconstructedAnswer = (userInputs: string[]) => {
         // Copy the answer without markers
         let reconstructed = answerWithoutMarkers;
-        
+
         // If all inputs are empty, return an empty string
         if (userInputs.every(input => !input || input.trim() === '')) {
             return '';
         }
-        
+
         // Change the blanks to the user inputs
         markedKeywords.forEach((keyword, index) => {
             if (index < userInputs.length && userInputs[index]) {
@@ -64,7 +79,7 @@ const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
                 }
             }
         });
-        
+
         return reconstructed;
     };
 
@@ -72,11 +87,14 @@ const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
         const newInputValues = [...inputValues];
         newInputValues[index] = value;
         setInputValues(newInputValues);
-        
+
+        // Watermarked data
+        const apiAnswer = prepareAnswerForAPI(newInputValues);
+        setBlankAnswer(apiAnswer);
+
         // Zbuduj pełną odpowiedź i zaktualizuj stan
         const reconstructed = buildFullReconstructedAnswer(newInputValues);
         setFullAnswer(reconstructed);
-        setBlankAnswer(reconstructed);
     };
 
     useEffect(() => {
@@ -101,7 +119,7 @@ const BlankAnswerInput = ({answer, setBlankAnswer}: Props) => {
                                     value={inputValues[index] || ''}
                                     onChange={(e) => handleInputChange(index, e.target.value)}
                                     ref={el => { inputRefs.current[index] = el; }}
-                                    placeholder="input"
+                                    // placeholder="input"
                                 />
                             )}
                         </React.Fragment>

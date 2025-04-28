@@ -9,129 +9,87 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function calculateTextSimilarity(userAnswer: string, correctAnswer: string): Promise<number> {
-    logger.info("=== SIMILARITY CHECK STARTED ===");
+// Extract keywords from the correct answer (the words with $ prefix)
+function extractKeywords(answer: string): string[] {
+    const keywordsWithDollar = answer.match(/\$\w+(-\w+)*/g) || [];
+    return keywordsWithDollar.map(word => word.substring(1)); // Remove $ sign
+}
+
+async function checkKeywordSimilarity(userWords: string[], correctKeywords: string[]): Promise<number> {
+    logger.info("=== CHECKING KEYWORD SIMILARITY ===");
+    logger.info(`User words: ${userWords.join(', ')}`);
+    logger.info(`Correct keywords: ${correctKeywords.join(', ')}`);
+
+    // If the number of words doesn't match, we'll just compare what we have
+    if (userWords.length !== correctKeywords.length) {
+        logger.warn(`Word count mismatch: user ${userWords.length}, expected ${correctKeywords.length}`);
+    }
 
     try {
-        // First log the inputs
-        logger.info(`Input - User answer: "${userAnswer}"`);
-        logger.info(`Input - Correct answer: "${correctAnswer}"`);
+        // Use OpenAI to check semantic similarity
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `You are a quiz grading assistant. Compare the user's answers with the correct answers and rate the similarity. 
+                    Return a single number from 0 to 100 based on how semantically similar they are.
+                    Examples:
+                    - "blue" vs "light blue" - high similarity (85-95%)
+                    - "apple" vs "orange" - low similarity (10-30%)
+                    - "democracy" vs "democratic system" - high similarity (90-100%)`
+                },
+                {
+                    role: "user",
+                    content: `User's answers: ${userWords.join(', ')}
+                    Correct answers: ${correctKeywords.join(', ')}
+                    
+                    Give a similarity score from 0-100 as a single number:`
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 10
+        });
 
-        // Basic validation
-        if (!userAnswer || userAnswer.trim().length < 2) {
-            logger.info("User answer too short, returning 0");
-            return 0;
+        const content = response.choices[0].message?.content?.trim() || "0";
+        logger.info(`OpenAI response: ${content}`);
+
+        // Extract number from response
+        const numberMatch = content.match(/\d+/);
+        if (numberMatch) {
+            const score = parseInt(numberMatch[0], 10);
+            logger.info(`Final similarity score: ${score}%`);
+            return score;
         }
 
-        // First calculate string similarity score
-        const userAnswerClean = userAnswer.toLowerCase().trim();
-        const correctAnswerClean = correctAnswer.toLowerCase().trim();
+        // Fallback to basic string comparison if OpenAI doesn't return a number
+        logger.warn("Couldn't extract score from OpenAI response, using fallback");
+        return calculateFallbackScore(userWords, correctKeywords);
 
-        const stringSimilarity = compareTwoStrings(userAnswerClean, correctAnswerClean);
-        const stringScore = Math.round(stringSimilarity * 100);
-
-        logger.info(`Basic string comparison score: ${stringScore}%`);
-
-        // For very low similarity, skip OpenAI
-        if (stringSimilarity < 0.05) {
-            logger.info("Very low similarity, skipping OpenAI check");
-            return stringScore;
-        }
-
-        // Check if OpenAI key is available
-        if (!process.env.OPENAI_API_KEY) {
-            logger.error("OpenAI API key is missing in environment variables");
-            return stringScore;
-        }
-
-        // Log OpenAI attempt
-        logger.info("Attempting OpenAI semantic similarity check...");
-
-        try {
-            // Use OpenAI to calculate semantic similarity
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o-mini", // Try a more reliable model instead of gpt-4o-mini
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert evaluating answer similarity. Your task is to assess how semantically similar a user's answer is to the correct answer. Return a single number from 0-100 representing similarity percentage. Return ONLY the number."
-                    },
-                    {
-                        role: "user",
-                        content: `Compare these two answers and rate their similarity from 0-100:
-                        
-                        CORRECT ANSWER: "${correctAnswer}"
-                        USER ANSWER: "${userAnswer}"
-                        
-                        Similarity score (just the number):`
-                    }
-                ],
-                temperature: 0.6,
-                max_tokens: 5
-            });
-
-            // Log the raw response for debugging
-            logger.info(`OpenAI raw response: ${JSON.stringify(response.choices)}`);
-
-            const content = response.choices[0].message?.content?.trim() || "0";
-            logger.info(`OpenAI processed content: "${content}"`);
-
-            // Extract just the numbers from the response
-            const numberMatch = content.match(/\d+/);
-            let similarityScore: number;
-
-            if (numberMatch) {
-                similarityScore = parseInt(numberMatch[0], 10);
-                logger.info(`Extracted number from response: ${similarityScore}`);
-            } else {
-                logger.warn(`Could not extract number from response: "${content}"`);
-                similarityScore = stringScore; // Fallback to string similarity
-            }
-
-            // Validate the score
-            if (isNaN(similarityScore) || similarityScore < 0 || similarityScore > 100) {
-                logger.warn(`Invalid similarity score (${similarityScore}), using string similarity instead`);
-                return stringScore;
-            }
-
-            logger.info(`Final OpenAI similarity score: ${similarityScore}%`);
-            return similarityScore;
-
-        } catch (openaiError) {
-            // Print the full error details
-            logger.error(`OpenAI API error: ${JSON.stringify(openaiError)}`);
-            if (openaiError instanceof Error) {
-                logger.error(`Error message: ${openaiError.message}`);
-                logger.error(`Error stack: ${openaiError.stack}`);
-            }
-
-            // Fallback to string similarity
-            logger.info(`Falling back to string similarity score: ${stringScore}%`);
-            return stringScore;
-        }
     } catch (error) {
-        // Log complete error details
-        logger.error(`Unexpected error in calculateTextSimilarity: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        if (error instanceof Error && error.stack) {
-            logger.error(`Error stack: ${error.stack}`);
-        }
-
-        // Ultimate fallback - try one more time with just string comparison
-        try {
-            const fallbackScore = Math.round(compareTwoStrings(
-                userAnswer.toLowerCase().trim(),
-                correctAnswer.toLowerCase().trim()
-            ) * 100);
-
-            logger.info(`Emergency fallback similarity score: ${fallbackScore}%`);
-            return fallbackScore;
-        } catch {
-            logger.error("Even string similarity failed, returning 0");
-            return 0;
-        }
-    } finally {
-        logger.info("=== SIMILARITY CHECK COMPLETED ===");
+        logger.error(`Error with OpenAI: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        return calculateFallbackScore(userWords, correctKeywords);
     }
+}
+
+// Basic string comparison as fallback
+function calculateFallbackScore(userWords: string[], correctKeywords: string[]): number {
+    logger.info("Using fallback string comparison");
+
+    const minLength = Math.min(userWords.length, correctKeywords.length);
+    let totalSimilarity = 0;
+
+    for (let i = 0; i < minLength; i++) {
+        const similarity = compareTwoStrings(
+            userWords[i].toLowerCase().trim(),
+            correctKeywords[i].toLowerCase().trim()
+        );
+        totalSimilarity += similarity;
+    }
+
+    const score = Math.round((totalSimilarity / minLength) * 100);
+    logger.info(`Fallback similarity score: ${score}%`);
+    return score;
 }
 
 export async function POST(request: Request) {
@@ -147,73 +105,97 @@ export async function POST(request: Request) {
         });
 
         if (!question) {
-            logger.warn(`Question not found: ${questionId}`);
             return NextResponse.json(
                 { message: "Question not found" },
                 { status: 404 }
             );
         }
 
-        // Save the user's answer regardless of question type
+        // Save user's answer
         await prisma.question.update({
             where: { id: questionId },
-            data: { userAnswer: userAnswer }
+            data: { userAnswer }
         });
 
         // Handle multiple choice questions
         if (question.questionType === 'multiple_choice') {
             const isCorrect = question.answer.toLowerCase().trim() === userAnswer.toLowerCase().trim();
 
-            logger.info(`Multiple choice question - User answer: "${userAnswer}", Correct: ${isCorrect}`);
-
             await prisma.question.update({
                 where: { id: questionId },
                 data: { isCorrect }
             });
 
-            return NextResponse.json(
-                {
-                    message: "Answer checked",
-                    isCorrect
-                },
-                { status: 200 }
-            );
+            return NextResponse.json({ isCorrect }, { status: 200 });
         }
         // Handle open-ended questions
         else if (question.questionType === 'open_ended') {
             logger.info(`Open-ended question - Calculating similarity between answers`);
 
-            const percentageSimilar = await calculateTextSimilarity(userAnswer, question.answer);
+            // Extract original keywords from the question
+            const correctKeywords = extractKeywords(question.answer);
+            logger.info(`Correct keywords: ${correctKeywords.join(', ')}`);
+
+            // Extract user's keywords (marked with $)
+            const userKeywordsRegex = /\$([\w\s-]+?)\$/g;
+            let match;
+            const userWords = [];
+
+            // Find all $keyword$ patterns
+            while ((match = userKeywordsRegex.exec(userAnswer)) !== null) {
+                userWords.push(match[1]); // Add the word without $ markers
+            }
+
+            logger.info(`Extracted user keywords: ${userWords.join(', ')}`);
+
+            // If no keywords were found with $ markers, try splitting by spaces
+            if (userWords.length === 0) {
+                logger.info("No $ markers found, trying to split by spaces");
+                const fallbackWords = userAnswer.split(/\s+/).filter(word =>
+                    word.trim() !== '' &&
+                    word.trim() !== '[blank]'
+                );
+
+                if (fallbackWords.length > 0) {
+                    logger.info(`Using space-separated words: ${fallbackWords.join(', ')}`);
+                    // Calculate similarity using the fallback words
+                    const percentageSimilar = await checkKeywordSimilarity(fallbackWords, correctKeywords);
+
+                    await prisma.question.update({
+                        where: { id: questionId },
+                        data: { percentageCorrect: percentageSimilar }
+                    });
+
+                    return NextResponse.json({ percentageSimilar }, { status: 200 });
+                }
+
+                logger.warn("No valid user input found");
+                return NextResponse.json({ percentageSimilar: 0 }, { status: 200 });
+            }
+
+            // Calculate similarity between the keywords
+            const percentageSimilar = await checkKeywordSimilarity(userWords, correctKeywords);
 
             logger.info(`Similarity result: ${percentageSimilar}%`);
 
+            // Update the question
             await prisma.question.update({
                 where: { id: questionId },
                 data: { percentageCorrect: percentageSimilar }
             });
 
-            return NextResponse.json(
-                { percentageSimilar },
-                { status: 200 }
-            );
+            return NextResponse.json({ percentageSimilar }, { status: 200 });
         }
-        // Handle unexpected question types
         else {
-            logger.warn(`Unexpected question type: ${question.questionType}`);
             return NextResponse.json(
-                {
-                    message: `Answer recorded for question type: ${question.questionType}`,
-                    isCorrect: null
-                },
-                { status: 200 }
+                { message: "Unsupported question type" },
+                { status: 400 }
             );
         }
     } catch (error) {
         logger.error(`Error in checkAnswer: ${error instanceof Error ? error.message : 'Unknown error'}`);
         return NextResponse.json(
-            {
-                message: error instanceof Error ? error.message : "An unknown error occurred"
-            },
+            { message: error instanceof Error ? error.message : "An unknown error occurred" },
             { status: 400 }
         );
     }
