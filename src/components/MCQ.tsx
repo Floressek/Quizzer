@@ -165,8 +165,8 @@ const MCQ = ({game}: Props) => {
 
     return (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-[80vw] max-w-4xl w-[90vw]">
-            <div className="flex flex-row justify-between">
-                <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <div className="flex flex-col">
                     {/*topic*/}
                     <p>
                         <span className="mr-2 text-slate-400">Topic</span>
