@@ -5,6 +5,7 @@ import QuizMeCard from "@/components/dashboard/QuizMeCard";
 import HistoryCard from "@/components/dashboard/HistoryCard";
 import HotTopics from "@/components/dashboard/HotTopics";
 import RecentActivities from "@/components/dashboard/RecentActivities";
+import FlashcardsCard from "@/components/dashboard/FlashcardsCard";
 
 type Props = {};
 
@@ -24,11 +25,12 @@ const Dashboard = async (props: Props) => {
             <div className="flex items-center">
                 <h2 className="mr-2 text-3x1 font-bold tracking-tight"></h2>
             </div>
-            <div className="grid gap-4 mt-4 md:grid-cols-2">
+            <div className="grid gap-4 mt-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 <QuizMeCard />
                 <HistoryCard />
+                <FlashcardsCard />
             </div>
-            <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-7">
+            <div className="grid gap-4 mt-4 grid-cols-1 md:grid-cols-2">
                 <HotTopics/>
                 <RecentActivities/>
             </div>

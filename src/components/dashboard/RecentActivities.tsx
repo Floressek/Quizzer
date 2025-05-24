@@ -5,7 +5,7 @@ type Props = {}
 
 const RecentActivities = (props: Props) => {
     return (
-        <Card className="col-span-4 lg:col-span-3">
+        <Card className="w-full">
             <CardHeader>
                 <CardTitle className="text-2xl font-bold">
                     Recent Activities
@@ -15,7 +15,7 @@ const RecentActivities = (props: Props) => {
                     You have played a total of X number of quizzes.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="max-h-[580px] overflow-scroll">
+            <CardContent className="max-h-[580px] overflow-y-auto">
                 History of your played games will be displayed here.
             </CardContent>
         </Card>
