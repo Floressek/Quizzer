@@ -23,6 +23,12 @@ export default async function FlashcardHistoryPage() {
 
     return (
         <div className="w-full max-w-xl px-4 mx-auto py-12">
+            <Link
+                href="/flashcards"
+                className="self-start text-sm text-blue-400 hover:underline mb-2"
+            >
+                ← Back to Flashcards
+            </Link>
             <h1 className="w-full max-w-2xl px-4 mx-auto py-8">Your Quizzes</h1>
             <ul className="space-y-4">
                 {games.map((game) => (
