@@ -18,7 +18,7 @@ const TimeTakenCard = ({timeEnded, timeStarted}: Props) => {
           </CardHeader>
           <CardContent>
               <div className="text-sm font-medium">
-                  {formatTimeDelta(differenceInSeconds(timeStarted, timeEnded))}
+                  {formatTimeDelta(differenceInSeconds(timeEnded, timeStarted))}
               </div>
           </CardContent>
       </Card>

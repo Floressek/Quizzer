@@ -10,6 +10,7 @@ import ResultsCard from "@/components/statistics/ResultsCard";
 import AccuracyCard from "@/components/statistics/AccuracyCard";
 import TimeTakenCard from "@/components/statistics/TimeTakenCard";
 import QuestionList from "@/components/statistics/QuestionList";
+import {GameType} from "@prisma/client";
 
 type Props = {
     params: {
@@ -38,7 +39,7 @@ const StatisticsPage = async (props : Props) => {
     }
 
     let accuracy: number = 0;
-    if (game.gameType == 'mcq') {
+    if (game.gameType === "mcq") {
         const totalCorrect = game.questions.reduce((acc, question) => {
             if (question.isCorrect) {
                 return acc + 1;
@@ -46,7 +47,7 @@ const StatisticsPage = async (props : Props) => {
         return acc;
     }, 0);
         accuracy = (totalCorrect / game.questions.length) * 100;
-    } else if (game.gameType === 'open_ended') {
+    } else if (game.gameType === GameType.open_ended) {
         const totalPercentage = game.questions.reduce((acc, question) => {
             return acc + (question.percentageCorrect ?? 0)
         }, 0)
