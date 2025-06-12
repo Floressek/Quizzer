@@ -8,7 +8,7 @@ type Props = {
 };
 
 const QuestionList = ({questions}: Props) => {
-    let gameType = questions[0].questionType;
+    const gameType = questions[0].questionType;
     return (
         <Table className="mt-4">
             <TableCaption>End of list.</TableCaption>
@@ -25,7 +25,6 @@ const QuestionList = ({questions}: Props) => {
             <TableBody>
                 <>
                     {questions.map((question, index) => {
-                        // @ts-ignore
                         return(
                             <TableRow key={question.id}>
                             <TableCell className="font-medium">{index + 1}</TableCell>
@@ -34,7 +33,7 @@ const QuestionList = ({questions}: Props) => {
                             <br />
                             <span className="font-semibold">{question.answer}</span>
                             </TableCell>
-                            {gameType === "mcq" && (
+                            {gameType === "multiple_choice" && (
                                     <TableCell className={cn({
                                         "text-green-600": question.isCorrect,
                                         "text-red-600": !question.isCorrect

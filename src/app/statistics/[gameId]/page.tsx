@@ -39,7 +39,7 @@ const StatisticsPage = async (props : Props) => {
     }
 
     let accuracy: number = 0;
-    if (game.gameType === "mcq") {
+    if (game.gameType === "multiple_choice") {
         const totalCorrect = game.questions.reduce((acc, question) => {
             if (question.isCorrect) {
                 return acc + 1;
