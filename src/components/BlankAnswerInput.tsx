@@ -131,17 +131,6 @@ const BlankAnswerInput = ({answer, setBlankAnswer, setFullUserAnswer}: Props) =>
                     );
                 })}
             </h1>
-            
-            <div className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-                {fullAnswer && (
-                    <>
-                        <p className="font-medium">Completed answer:</p>
-                        <p className="mt-1 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-md">
-                            {fullAnswer}
-                        </p>
-                    </>
-                )}
-            </div>
         </div>
     );
 };
