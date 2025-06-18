@@ -23,7 +23,9 @@ export default function RootLayout({
         <body className={cn(inter.className, "antialiased min-h-screen pt-16")}>
         <Providers>
             <Navbar/>
-            {children}
+            <main className="w-full min-h-screen max-w-7xl mx-auto px-4 sm:px-8 py-6 overflow-x-hidden">
+                {children}
+            </main>
             <Toaster position="bottom-right" closeButton={true} richColors={true} />
         </Providers>
         </body>
