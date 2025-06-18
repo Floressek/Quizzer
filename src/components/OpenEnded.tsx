@@ -139,6 +139,13 @@ const OpenEnded = ({game}: Props) => {
                     View Statistics
                     <BarChart className="w-4 h-4 ml-2"/>
                 </Link>
+                <Link
+                    href={`/src/app/flashcards/learn/${game.id}`}
+                    className={cn(buttonVariants({ size: "lg" }), "mt-2")}
+                >
+                    Review as Flashcards
+                </Link>
+
             </div>
         )
     }
