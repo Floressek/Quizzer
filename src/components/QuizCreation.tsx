@@ -67,8 +67,8 @@ const QuizCreation = (props: Props) => {
 
     return (
         // Custom box control
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-12">
-            <Card className="w-full h-full">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4 sm:px-8">
+        <Card className="w-full h-full">
                 <CardHeader>
                     <CardTitle className="text-2x font-bold">Quiz Creation</CardTitle>
                     <CardDescription>Choose a topic</CardDescription>

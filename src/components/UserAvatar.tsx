@@ -10,8 +10,8 @@ type Props = {
 // Reusable button component
 const UserAvatar = ({user}: Props) => {
     return (
-        <Avatar className="h-10 w-10">
-            {user.image ? (
+        <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+        {user.image ? (
                 <div className={"relative w-full h-full aspect-square"}>
                     <Image
                         fill

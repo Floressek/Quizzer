@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import cloud from "d3-cloud";
 import * as d3 from "d3";
 
@@ -38,8 +38,8 @@ const WordCloud: React.FC<Props> = ({
     useEffect(() => {
         const observer = new ResizeObserver((entries) => {
             for (const entry of entries) {
-                const { width } = entry.contentRect;
-                setDimensions({ width, height });
+                const {width} = entry.contentRect;
+                setDimensions({width, height});
             }
         });
 
@@ -90,7 +90,7 @@ const WordCloud: React.FC<Props> = ({
     }, [data, dimensions, font, fontSize, rotate, padding, fill, onWordClick]);
 
     return (
-        <div ref={wrapperRef} style={{ width: "100%", height: `${height}px` }}>
+        <div ref={wrapperRef} style={{width: "100%", height: `${height}px`}}>
             <svg ref={svgRef}></svg>
         </div>
     );
